@@ -1,0 +1,8 @@
+https://koenderks.github.io/jfa/articles/jfa.html
+https://koenderks.github.io/jfa/articles/audit-sampling.html
+https://koenderks.github.io/jfa/
+https://koenderks.github.io/jfa/articles/audit-sampling.html
+https://github.com/koenderks/jfa/blob/HEAD/vignettes/audit-sampling.Rmd
+https://www.rdocumentation.org/packages/jfa/versions/0.6.4
+https://cran.r-project.org/web/packages/jfa/index.html
+https://rdrr.io/cran/jfa/src/R/selection.R
