@@ -212,7 +212,7 @@ server <- function(input, output, session) {
                          conf.level = input$freq3
       )
       
-      set.seed(Sys.time())
+      set.seed(as.numeric(Sys.time()) + as.numeric(proc.time()[3]))
       
       stage2 <- selection(
         data = data(), 
