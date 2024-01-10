@@ -212,6 +212,8 @@ server <- function(input, output, session) {
                          conf.level = input$freq3
       )
       
+      set.seed(Sys.time())
+      
       stage2 <- selection(
         data = data(), 
         size = stage1,      #### Stage1 previous defined 
