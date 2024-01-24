@@ -209,7 +209,7 @@ server <- function(input, output, session) {
       )
     })
     
-    output$variable_select <- renderUI({
+    output$variable_select_MUM <- renderUI({
       if (is.null(data2())) {
         return(NULL)
       } else {
@@ -226,7 +226,7 @@ server <- function(input, output, session) {
   )
   
   # Genera la tabla reactiva
-  output$SugerenciasTamaño <- renderReactable({
+  output$SugerenciasTamaño_MUM <- renderReactable({
     reactable(sugerencias_tamaño, bordered = TRUE, highlight = TRUE)
     
     
@@ -248,18 +248,18 @@ server <- function(input, output, session) {
   # Objeto reactivo para el tamaño de muestra
   sample_size <- reactiveVal()  # Inicializa como un valor reactivo
   
-  observeEvent(input$update, {  # Cuando 'update' se presiona, se ejecuta el código dentro de observeEvent
-    stage1 <- planning(materiality = input$freq1, 
-                       expected = input$freq2,
-                       likelihood = input$distri, 
-                       conf.level = input$freq3
+  observeEvent(input$update_MUM, {  # Cuando 'update' se presiona, se ejecuta el código dentro de observeEvent
+    stage1 <- planning(materiality = input$freq1_MUM, 
+                       expected = input$freq2_MUM,
+                       likelihood = input$distri_1, 
+                       conf.level = input$freq3_MUM
     )
     
     sample_size(data.frame(`Muestra` = stage1$n))  # Asigna el valor al reactivo
   })
   
   # Renderizar la tabla de tamaño de muestra
-  output$SampleSize <- renderReactable({
+  output$SampleSize_MUM <- renderReactable({
     req(sample_size())  # Asegúrate de que el valor reactivo no sea NULL
     reactable(sample_size())  # Renderiza el valor reactivo en una tabla
   })
@@ -273,14 +273,14 @@ server <- function(input, output, session) {
   # Función reactiva para generar y almacenar la semilla
   reactive_seed <- reactiveVal()  # Inicializa como un valor reactivo
   
-  observeEvent(input$update, {  # Actualiza la semilla cuando se presiona 'update'
+  observeEvent(input$update_MUM, {  # Actualiza la semilla cuando se presiona 'update'
     seed_number <- sample(1:100000, 1)  # Genera un número aleatorio entre 1 y 100000
     reactive_seed(seed_number)  # Asigna el número a reactive_seed
   })
   
   
   # Crear una tabla reactiva para mostrar la semilla
-  output$seedvalue <- renderReactable({
+  output$seedvalue_MUM <- renderReactable({
     req(reactive_seed())  # Asegúrate de que la semilla no sea NULL
     reactable(data.frame(`Semilla` = reactive_seed()))  # Muestra la semilla en una tabla
   })
@@ -291,7 +291,7 @@ server <- function(input, output, session) {
   
   # Objeto reactivo para la selección de las unidades
   Muestra <- reactive({
-    req(input$update)  # Asegúrate de que el botón de actualizar se ha pulsado
+    req(input$update_MUM)  # Asegúrate de que el botón de actualizar se ha pulsado
     req(sample_size())  # Asegúrate de que el valor reactivo no sea NULL
     req(reactive_seed())  # Asegúrate de que la semilla reactiva no sea NULL
     
@@ -324,7 +324,7 @@ server <- function(input, output, session) {
     datos[muestra_ids, ]
   })
   
-  output$sample <- renderReactable({
+  output$sample_MUM <- renderReactable({
     req(Muestra())  # Asegúrate de que el objeto reactivo no sea NULL
     reactable(Muestra())  # Renderiza el objeto reactivo en una tabla
   })
@@ -333,7 +333,7 @@ server <- function(input, output, session) {
   #    Comparación de datos originales y muestra  #
   #################################################
   
-  output$comp_dist <- renderHighchart({
+  output$comp_dist_MUM <- renderHighchart({
     # Asegúrate de que tanto los datos originales como la muestra estén disponibles
     req(data2(), Muestra(), input$variable2)
     
@@ -359,7 +359,7 @@ server <- function(input, output, session) {
   #         Descargar muestra     #
   #################################
   
-  observeEvent(input$show1, {
+  observeEvent(input$show1_MUM, {
     
     showModal(modalDialog(
       title = "Descargar los datos ", br(),

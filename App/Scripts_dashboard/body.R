@@ -226,7 +226,7 @@ body <- dashboardBody(
                                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                                  )),
                        br(),
-                       uiOutput("variable_select"),
+                       uiOutput("variable_select_MUM"),
                        h4("IMPORTANTE: Debe seleccionar variables numéricas.",align = "left", style = "font-weight: bold"),
                        br(),
             #           plotOutput("histogram2"),
@@ -271,7 +271,7 @@ body <- dashboardBody(
                 collapsible = TRUE,
                 width = 8,  # Ocupará todo el ancho disponible
                 div(style = "height: 180px;",  # Establece el alto de la tabla
-                    reactableOutput("SugerenciasTamaño")
+                    reactableOutput("SugerenciasTamaño_MUM")
               )
               )
             ),
@@ -280,24 +280,24 @@ body <- dashboardBody(
                           de muestra que sea adecuado para sus necesidades específicas.",align = "left"),
                        br(),
                        h4("Nota: defina los parámetros, y luego presione sobre 'Análisis de muestreo. Recuerde la distribución aproximada de la sección 'Descriptivo'." ,align = "left"),
-                       sliderInput("freq1",
+                       sliderInput("freq1_MUM",
                                    "Tolerable:",
                                    min = 0.01,  max = 0.99, value = 0.05),
-                       sliderInput("freq2",
+                       sliderInput("freq2_MUM",
                                    "Esperado:",
                                    min = 0.01,  max = 0.99, value = 0.01), 
-                       selectInput("distri", "Seleccione el nivel:",  
+                       selectInput("distri_1", "Seleccione el nivel:",  
                                    list(`Tipo` = list("poisson",
                                                       "binomial"
                                                       
                                    )
                                    )
                        ),
-                       sliderInput("freq3",
+                       sliderInput("freq3_MUM",
                                    "Nivel de confianza:",
                                    min = 0.01,  max = 0.99, value = 0.95),
                        br(),
-                       actionButton("update", "Análsis del muestreo.", class = "btn-primary"),
+                       actionButton("update_MUM", "Análsis del muestreo.", class = "btn-primary"),
                        br(),
                        br(),
             
@@ -309,7 +309,7 @@ body <- dashboardBody(
                          box(
                            solidHeader = TRUE, 
                            width = 12,
-                           reactableOutput("SampleSize")  
+                           reactableOutput("SampleSize_MUM")  
                          )
                        ),
                        br(),
@@ -323,7 +323,7 @@ body <- dashboardBody(
               box(
                 solidHeader = TRUE, 
                 width = 12,
-                reactableOutput("seedvalue")  
+                reactableOutput("seedvalue_MUM")  
               )
             ),
             br(),
@@ -338,7 +338,7 @@ body <- dashboardBody(
                          box(
                            solidHeader = TRUE, 
                            width = 12,
-                           reactableOutput("sample")  
+                           reactableOutput("sample_MUM")  
                          )
                        ),
                        br(),
@@ -355,7 +355,7 @@ body <- dashboardBody(
                 solidHeader = TRUE,
                 collapsible = TRUE,
                 width = 8,
-                highchartOutput("comp_dist")  
+                highchartOutput("comp_dist_MUM")  
               )
             ),
             
@@ -365,7 +365,7 @@ body <- dashboardBody(
                        
                        h3("Descargar la muestra seleccionada"),
                        br(),
-                       actionButton("show1", "Descargar archivo")
+                       actionButton("show1_MUM", "Descargar archivo")
   ),
   
   
