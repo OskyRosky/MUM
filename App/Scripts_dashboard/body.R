@@ -378,12 +378,12 @@ body <- dashboardBody(
   tabItem(tabName = "p4",
           
             
-                       h1("Muestreo a Juicio", align = "center"),
+                       h1("Muestreo LES", align = "center"),
     
             br(),
             h2("En este sección:", align = "left"),
             br(),
-            h4("Se lleva a cabo el proceso de muestreo: tamaño y selección de la unidades a Juicio", align ="left"),
+            h4("Se lleva a cabo el proceso de muestreo: tamaño y selección de la unidades según el LES.", align ="left"),
             br(),
             h4("Cargado los datos, usted podrá:"),
             br(),
@@ -409,7 +409,7 @@ body <- dashboardBody(
                       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                     )),
           br(),
-          uiOutput("variable_select_2"),
+          uiOutput("variable_select_LES"),
           h4("IMPORTANTE: Debe seleccionar variables numéricas.",align = "left", style = "font-weight: bold"),
           br(),
           #           plotOutput("histogram2"),
@@ -453,14 +453,132 @@ body <- dashboardBody(
               collapsible = TRUE,
               width = 8,  # Ocupará todo el ancho disponible
               div(style = "height: 180px;",  # Establece el alto de la tabla
-                  reactableOutput("SugerenciasTamaño2")
+                  reactableOutput("SugerenciasTamaño_LES")
               )
             )
           ),
           
+          #### Selección de los parámetros para el tamaño de muestra #####
+          
+          h4("Utilizando los controles deslizantes de tu aplicación, los usuarios pueden ajustar estos parámetros para determinar un tamaño 
+                          de muestra que sea adecuado para sus necesidades específicas.",align = "left"),
+          br(),
+          h4("Nota: defina los parámetros, y luego presione sobre 'Análisis de muestreo. Recuerde la distribución aproximada de la sección 'Descriptivo'." ,align = "left"),
+          sliderInput("freq1_LES",
+                      "Tolerable:",
+                      min = 0.01,  max = 0.99, value = 0.05),
+          sliderInput("freq2_LES",
+                      "Esperado:",
+                      min = 0.01,  max = 0.99, value = 0.01), 
+          selectInput("distri_2", "Seleccione el nivel:",  
+                      list(`Tipo` = list("poisson",
+                                         "binomial"
+                                         
+                      )
+                      )
+          ),
+          sliderInput("freq3_LES",
+                      "Nivel de confianza:",
+                      min = 0.01,  max = 0.99, value = 0.95),
+          br(),
+          h4("Valor LES.",align = "left"),
+          numericInput("LES", "Valor del LES:", min = 0, value = 100000),
+          actionButton("update_LES", "Análsis del muestreo.", class = "btn-primary"),
+          br(),
+          br(),
+          
+          ########################
+          # Tamaño de la muestra #
+          ########################
+          
+          fluidRow(
+            box(
+              solidHeader = TRUE, 
+              status = "primary",
+              collapsible = TRUE,
+              width = 8,
+              reactableOutput("SampleSize_LES")  
+            )
+          ),
+          br(),
+          
+          ##################################
+          #   Conteo de valores según LES  # 
+          ##################################
+          
+          fluidRow(
+            box(
+              title = "Conteo de Valores según LES",
+              solidHeader = TRUE,
+              status = "primary",
+              collapsible = TRUE,
+              width = 8,
+              reactableOutput("ConteoLes")
+            )
+          ),
+
+          #######################
+          # Valor de la semilla #
+          #######################
+          
+          fluidRow(
+            box(
+              solidHeader = TRUE, 
+              status = "primary",
+              collapsible = TRUE,
+              width = 8,
+              reactableOutput("seedvalue_LES")  
+            )
+          ),
+          br(),
+          br(),
+          
+ 
+          ######################## 
+          # Muestra seleccionada 
+          ########################
+          
+          fluidRow(
+            box(
+              title = "Muestra Seleccionada",
+              solidHeader = TRUE,
+              status = "primary",
+              collapsible = TRUE,
+              width = 8,
+              reactableOutput("MuestraLES")
+            )
+          ),
+          
+          br(),
+          
+
+          #################################################
+          #    Comparación de datos originales y muestra  #
+          #################################################
           
           
+          h3("Comparación de datos cargados vs muestra seleccionada"),
+          br(),
+          fluidRow(
+            box(
+              title = "Comparación de distribuciones entre datos cargados y las unidades seleccionadas a partir de la muestra de datos",
+              status = "primary",
+              solidHeader = TRUE,
+              collapsible = TRUE,
+              width = 8,
+              highchartOutput("comp_dist_LES")  
+            )
+          ),
           
+          br(),
+          
+          #################################
+          #         Descargar muestra     #
+          #################################
+          
+          h3("Descargar la muestra seleccionada"),
+          br(),
+          actionButton("show1_LES", "Descargar archivo")
           
           
           ),

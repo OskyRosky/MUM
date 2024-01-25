@@ -266,7 +266,7 @@ server <- function(input, output, session) {
   
   
   #################################
-  #    Valor de la semilla    #
+  #    Valor de la semilla MUM    #
   #################################
   
   
@@ -382,7 +382,7 @@ server <- function(input, output, session) {
     
     
     filename = function() {
-      paste("Muestra-", Sys.Date(), ".csv", sep="")
+      paste("Muestra_MUM-", Sys.Date(), ".csv", sep="")
     },
     
     content = function(file) {
@@ -393,7 +393,7 @@ server <- function(input, output, session) {
   output$download2.2 <- downloadHandler(
     
     filename = function() {
-      paste("Muestra-", Sys.Date(), ".txt", sep="")
+      paste("Muestra_MUM-", Sys.Date(), ".txt", sep="")
     },
     content = function(file) {
       write.table(Muestra(), file)
@@ -402,7 +402,7 @@ server <- function(input, output, session) {
   
   output$download2.3 <- downloadHandler(
     filename = function() {
-      paste("Muestra-", Sys.Date(), ".xlsx", sep="")
+      paste("Muestra_MUM-", Sys.Date(), ".xlsx", sep="")
     },
     content = function(file) {
       # Suponiendo que Muestra() es una función que retorna el dataframe que quieres descargar
@@ -449,7 +449,7 @@ server <- function(input, output, session) {
     )
   })
   
-  output$variable_select_2 <- renderUI({
+  output$variable_select_LES <- renderUI({
     if (is.null(data3())) {
       return(NULL)
     } else {
@@ -467,7 +467,7 @@ server <- function(input, output, session) {
   )
   
   # Genera la tabla reactiva
-  output$SugerenciasTamaño2 <- renderReactable({
+  output$SugerenciasTamaño_LES <- renderReactable({
     reactable(sugerencias_tamaño_2, bordered = TRUE, highlight = TRUE)
     
     
@@ -478,19 +478,206 @@ server <- function(input, output, session) {
   #    Cálculo tamaño muestra     #
   #################################
   
+  # Objeto reactivo para el tamaño de muestra
+  sample_size <- reactiveVal()  # Inicializa como un valor reactivo
+  
+  observeEvent(input$update_LES, {  # Cuando 'update' se presiona, se ejecuta el código dentro de observeEvent
+    stage1 <- planning(materiality = input$freq1_LES, 
+                       expected = input$freq2_LES,
+                       likelihood = input$distri_2, 
+                       conf.level = input$freq3_LES
+    )
+    
+    sample_size(data.frame(`Muestra` = stage1$n))  # Asigna el valor al reactivo
+  })
+  
+  # Renderizar la tabla de tamaño de muestra
+  output$SampleSize_LES <- renderReactable({
+    req(sample_size())  # Asegúrate de que el valor reactivo no sea NULL
+    reactable(sample_size())  # Renderiza el valor reactivo en una tabla
+  })
+  
+  
+  ######################################
+  #    Selección unidades según LES    #
+  ######################################
+  
+  reactive_seed <- reactiveVal()  # Inicializa como un valor reactivo
+  
+  observeEvent(input$update_LES, {
+    seed_number <- sample(1:100000, 1)
+    reactive_seed(seed_number)
+    # ... [Resto del código para actualizar la muestra] ...
+  })
+  
+  
+  # Crear una tabla reactiva para mostrar la semilla
+  output$seedvalue_LES <- renderReactable({
+    req(reactive_seed())  # Asegúrate de que la semilla no sea NULL
+    reactable(data.frame(`Semilla` = reactive_seed()))  # Muestra la semilla en una tabla
+  })
+  
+  
+  # Objeto reactivo para la selección de las unidades
+  Muestra_2 <- reactive({
+    req(input$update_LES)
+    req(sample_size())
+    req(data3())
+    
+    LES <- input$LES
+    n_muestra <- sample_size()$Muestra
+    datos <- data3()
+    
+    datos_mayores <- datos[datos[[input$variable3]] > LES, ]
+    n_adicional <- n_muestra - nrow(datos_mayores)
+    
+    if(n_adicional > 0) {
+      datos_menores <- datos[datos[[input$variable3]] <= LES, ]
+      set.seed(reactive_seed())  # Usa la semilla aleatoria generada
+      ids_adicionales <- sample(nrow(datos_menores), n_adicional, replace = FALSE)
+      datos_adicionales <- datos_menores[ids_adicionales, ]
+      datos_muestra <- rbind(datos_mayores, datos_adicionales)
+    } else {
+      datos_muestra <- datos_mayores
+    }
+    
+    return(datos_muestra)
+  })
+  
+  output$MuestraLES <- renderReactable({
+    req(Muestra_2())
+    reactable(Muestra_2())
+  })
+  
+  #################################
+  #    Valor de la semilla MUM    #
+  #################################
+  
+  
+  # Función reactiva para generar y almacenar la semilla
+  reactive_seed <- reactiveVal()  # Inicializa como un valor reactivo
+  
+  observeEvent(input$update_LES, {  # Actualiza la semilla cuando se presiona 'update'
+    seed_number <- sample(1:100000, 1)  # Genera un número aleatorio entre 1 y 100000
+    reactive_seed(seed_number)  # Asigna el número a reactive_seed
+  })
+  
+  
+  # Crear una tabla reactiva para mostrar la semilla
+  output$seedvalue_LES <- renderReactable({
+    req(reactive_seed())  # Asegúrate de que la semilla no sea NULL
+    reactable(data.frame(`Semilla` = reactive_seed()))  # Muestra la semilla en una tabla
+  })
+  
+  #################################
+  #    Conteo de los valores LES  #
+  #################################
+  
+  conteoLES <- reactive({
+    req(input$update_LES)
+    req(Muestra_2())
+    
+    LES <- input$LES
+    muestra <- Muestra_2()
+    
+    conteo_mayores <- sum(muestra[[input$variable3]] > LES, na.rm = TRUE)
+    conteo_menores <- sum(muestra[[input$variable3]] <= LES, na.rm = TRUE)
+    
+    data.frame(
+      `Categoría` = c("Mayores que LES", "Menores o iguales a LES"),
+      `Conteo` = c(conteo_mayores, conteo_menores)
+    )
+  })
+  
+  # Renderizar la tabla de conteo LES para la muestra seleccionada
+  output$ConteoLes <- renderReactable({
+    req(conteoLES())  # Asegúrate de que el objeto reactivo no sea NULL
+    reactable(conteoLES())  # Renderiza el objeto reactivo en una tabla
+  })
+  
+  
+  #################################################
+  #    Comparación de datos originales y muestra  #
+  #################################################
+  
+  output$comp_dist_LES <- renderHighchart({
+    # Asegúrate de que tanto los datos originales como la muestra estén disponibles
+    req(data3(), Muestra_2(), input$variable3)
+    
+    # Calcular la densidad para los datos originales
+    dens_orig <- density(data3()[[input$variable3]], na.rm = TRUE)
+    dens_orig_df <- data.frame(x = dens_orig$x, y = dens_orig$y)
+    
+    # Calcular la densidad para la muestra
+    dens_muestra <- density(Muestra_2()[[input$variable3]], na.rm = TRUE)
+    dens_muestra_df <- data.frame(x = dens_muestra$x, y = dens_muestra$y)
+    
+    # Crear el gráfico de densidad comparativa
+    highchart() %>%
+      hc_add_series(name = "Datos Originales", data = list_parse(dens_orig_df), type = "area", color = "skyblue") %>%
+      hc_add_series(name = "Muestra LES", data = list_parse(dens_muestra_df), type = "area", color = "green") %>%
+      hc_tooltip(crosshairs = TRUE, valueDecimals = 1, shared = TRUE, borderWidth = 5) %>%
+      hc_chart(zoomType = "xy") %>%
+      hc_title(text = "Comparación de Densidades")  %>%
+      hc_exporting(enabled = TRUE)
+  })
   
   
   
+  #################################################
+  #     Descargar datos del muestreo por LES      #
+  #################################################
   
+  observeEvent(input$show1_LES, {
+    
+    showModal(modalDialog(
+      title = "Descargar los datos ", br(),
+      br(),
+      downloadButton("download4.1",".csv file"),
+      br(),
+      br(),
+      downloadButton("download4.2",".txt file"),
+      br(),
+      br(),
+      downloadButton("download4.3",".xlsx file"),
+      
+      footer = modalButton("Close"),
+      easyClose = TRUE)
+    )
+    
+  })
   
+  output$download4.1 <- downloadHandler(
+    
+    
+    filename = function() {
+      paste("MuestraLES-", Sys.Date(), ".csv", sep="")
+    },
+    
+    content = function(file) {
+      write.csv(Muestra_2(), file)
+    }
+  )
   
+  output$download4.2 <- downloadHandler(
+    
+    filename = function() {
+      paste("MuestraLES-", Sys.Date(), ".txt", sep="")
+    },
+    content = function(file) {
+      write.table(Muestra_2(), file)
+    }
+  )
   
-  
-  
-  
-  
-  
-  
+  output$download4.3 <- downloadHandler(
+    filename = function() {
+      paste("MuestraLES-", Sys.Date(), ".xlsx", sep="")
+    },
+    content = function(file) {
+      # Suponiendo que Muestra() es una función que retorna el dataframe que quieres descargar
+      write.xlsx(Muestra_2(), file)
+    }
+  )
   
   #################################################################################
   #################################################################################
