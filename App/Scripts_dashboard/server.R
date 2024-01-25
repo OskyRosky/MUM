@@ -180,7 +180,7 @@ server <- function(input, output, session) {
   
   #################################################################################
   #################################################################################
-  #                                  Muestreo                                     #
+  #                                  Muestreo   MUM                               #
   #################################################################################
   #################################################################################
   
@@ -241,175 +241,198 @@ server <- function(input, output, session) {
   # })
   
   
-  #################################
-  #    Cálculo tamaño muestra     #
-  #################################
-  
-  # Objeto reactivo para el tamaño de muestra
-  sample_size <- reactiveVal()  # Inicializa como un valor reactivo
-  
-  observeEvent(input$update_MUM, {  # Cuando 'update' se presiona, se ejecuta el código dentro de observeEvent
-    stage1 <- planning(materiality = input$freq1_MUM, 
-                       expected = input$freq2_MUM,
-                       likelihood = input$distri_1, 
-                       conf.level = input$freq3_MUM
-    )
-    
-    sample_size(data.frame(`Muestra` = stage1$n))  # Asigna el valor al reactivo
-  })
-  
-  # Renderizar la tabla de tamaño de muestra
-  output$SampleSize_MUM <- renderReactable({
-    req(sample_size())  # Asegúrate de que el valor reactivo no sea NULL
-    reactable(sample_size())  # Renderiza el valor reactivo en una tabla
-  })
   
   
   #################################
-  #    Valor de la semilla MUM    #
+  #   Condicional     #
   #################################
   
+  observeEvent(input$update_MUM, {
+    if (input$freq2_MUM >= input$freq1_MUM) {
+      showModal(modalDialog(
+        title = "Advertencia",
+        "No se procede con el análisis por la mala especificación de los parámetros de los errores tolerables y esperados. Especifique bien los valores. Recordar que el valor esperado siempre debe ser inferior al error tolerable.",
+        easyClose = TRUE,
+        footer = NULL
+      ))
+    } else {
   
-  # Función reactiva para generar y almacenar la semilla
-  reactive_seed <- reactiveVal()  # Inicializa como un valor reactivo
-  
-  observeEvent(input$update_MUM, {  # Actualiza la semilla cuando se presiona 'update'
-    seed_number <- sample(1:100000, 1)  # Genera un número aleatorio entre 1 y 100000
-    reactive_seed(seed_number)  # Asigna el número a reactive_seed
-  })
-  
-  
-  # Crear una tabla reactiva para mostrar la semilla
-  output$seedvalue_MUM <- renderReactable({
-    req(reactive_seed())  # Asegúrate de que la semilla no sea NULL
-    reactable(data.frame(`Semilla` = reactive_seed()))  # Muestra la semilla en una tabla
-  })
-  
-  #################################
-  #    Muestra PPT y Aleatoria    #
-  #################################
-  
-  # Objeto reactivo para la selección de las unidades
-  Muestra <- reactive({
-    req(input$update_MUM)  # Asegúrate de que el botón de actualizar se ha pulsado
-    req(sample_size())  # Asegúrate de que el valor reactivo no sea NULL
-    req(reactive_seed())  # Asegúrate de que la semilla reactiva no sea NULL
-    
-    n_muestra <- sample_size()$Muestra
-    datos <- data2()
-    
-    # Asegúrate de que hay datos para procesar
-    if (is.null(datos) || is.null(n_muestra)) {
-      return(NULL)
-    }
-    
-    # Calcula las probabilidades de selección
-    total_valor <- sum(datos[[input$variable2]], na.rm = TRUE)
-    if (total_valor == 0) return(NULL)  # Evita división por cero
-    
-    prob_seleccion <- datos[[input$variable2]] / total_valor
-    
-    # Utiliza la semilla aleatoria para la selección de muestras
-    set.seed(reactive_seed())
-    
-    # Selecciona las unidades de la muestra según sus probabilidades
-    muestra_ids <- sample(
-      x = seq_len(nrow(datos)), 
-      size = n_muestra, 
-      replace = FALSE, 
-      prob = prob_seleccion
-    )
-    
-    # Devuelve las filas seleccionadas para la muestra
-    datos[muestra_ids, ]
-  })
-  
-  output$sample_MUM <- renderReactable({
-    req(Muestra())  # Asegúrate de que el objeto reactivo no sea NULL
-    reactable(Muestra())  # Renderiza el objeto reactivo en una tabla
-  })
-  
-  #################################################
-  #    Comparación de datos originales y muestra  #
-  #################################################
-  
-  output$comp_dist_MUM <- renderHighchart({
-    # Asegúrate de que tanto los datos originales como la muestra estén disponibles
-    req(data2(), Muestra(), input$variable2)
-    
-    # Calcular la densidad para los datos originales
-    dens_orig <- density(data2()[[input$variable2]], na.rm = TRUE)
-    dens_orig_df <- data.frame(x = dens_orig$x, y = dens_orig$y)
-    
-    # Calcular la densidad para la muestra
-    dens_muestra <- density(Muestra()[[input$variable2]], na.rm = TRUE)
-    dens_muestra_df <- data.frame(x = dens_muestra$x, y = dens_muestra$y)
-    
-    # Crear el gráfico de densidad comparativa
-    highchart() %>%
-      hc_add_series(name = "Datos Originales", data = list_parse(dens_orig_df), type = "area", color = "skyblue") %>%
-      hc_add_series(name = "Muestra", data = list_parse(dens_muestra_df), type = "area", color = "green") %>%
-      hc_tooltip(crosshairs = TRUE, valueDecimals = 1, shared = TRUE, borderWidth = 5) %>%
-      hc_chart(zoomType = "xy") %>%
-      hc_title(text = "Comparación de Densidades")  %>%
-      hc_exporting(enabled = TRUE)
-  })
-
-  #################################
-  #         Descargar muestra     #
-  #################################
-  
-  observeEvent(input$show1_MUM, {
-    
-    showModal(modalDialog(
-      title = "Descargar los datos ", br(),
-      br(),
-      downloadButton("download2.1",".csv file"),
-      br(),
-      br(),
-      downloadButton("download2.2",".txt file"),
-      br(),
-      br(),
-      downloadButton("download2.3",".xlsx file"),
       
-      footer = modalButton("Close"),
-      easyClose = TRUE)
-    )
-    
+      #################################
+      #    Cálculo tamaño muestra     #
+      #################################
+      
+      # Objeto reactivo para el tamaño de muestra
+      sample_size <- reactiveVal()  # Inicializa como un valor reactivo
+      
+      observeEvent(input$update_MUM, {  # Cuando 'update' se presiona, se ejecuta el código dentro de observeEvent
+        stage1 <- planning(materiality = input$freq1_MUM, 
+                           expected = input$freq2_MUM,
+                           likelihood = input$distri_1, 
+                           conf.level = input$freq3_MUM
+        )
+        
+        sample_size(data.frame(`Muestra` = stage1$n))  # Asigna el valor al reactivo
+      })
+      
+      # Renderizar la tabla de tamaño de muestra
+      output$SampleSize_MUM <- renderReactable({
+        req(sample_size())  # Asegúrate de que el valor reactivo no sea NULL
+        reactable(sample_size())  # Renderiza el valor reactivo en una tabla
+      })
+      
+      
+      #################################
+      #    Valor de la semilla MUM    #
+      #################################
+      
+      
+      # Función reactiva para generar y almacenar la semilla
+      reactive_seed <- reactiveVal()  # Inicializa como un valor reactivo
+      
+      observeEvent(input$update_MUM, {  # Actualiza la semilla cuando se presiona 'update'
+        seed_number <- sample(1:100000, 1)  # Genera un número aleatorio entre 1 y 100000
+        reactive_seed(seed_number)  # Asigna el número a reactive_seed
+      })
+      
+      
+      # Crear una tabla reactiva para mostrar la semilla
+      output$seedvalue_MUM <- renderReactable({
+        req(reactive_seed())  # Asegúrate de que la semilla no sea NULL
+        reactable(data.frame(`Semilla` = reactive_seed()))  # Muestra la semilla en una tabla
+      })
+      
+      #################################
+      #    Muestra PPT y Aleatoria    #
+      #################################
+      
+      # Objeto reactivo para la selección de las unidades
+      Muestra <- reactive({
+        req(input$update_MUM)  # Asegúrate de que el botón de actualizar se ha pulsado
+        req(sample_size())  # Asegúrate de que el valor reactivo no sea NULL
+        req(reactive_seed())  # Asegúrate de que la semilla reactiva no sea NULL
+        
+        n_muestra <- sample_size()$Muestra
+        datos <- data2()
+        
+        # Asegúrate de que hay datos para procesar
+        if (is.null(datos) || is.null(n_muestra)) {
+          return(NULL)
+        }
+        
+        # Calcula las probabilidades de selección
+        total_valor <- sum(datos[[input$variable2]], na.rm = TRUE)
+        if (total_valor == 0) return(NULL)  # Evita división por cero
+        
+        prob_seleccion <- datos[[input$variable2]] / total_valor
+        
+        # Utiliza la semilla aleatoria para la selección de muestras
+        set.seed(reactive_seed())
+        
+        # Selecciona las unidades de la muestra según sus probabilidades
+        muestra_ids <- sample(
+          x = seq_len(nrow(datos)), 
+          size = n_muestra, 
+          replace = FALSE, 
+          prob = prob_seleccion
+        )
+        
+        # Devuelve las filas seleccionadas para la muestra
+        datos[muestra_ids, ]
+      })
+      
+      output$sample_MUM <- renderReactable({
+        req(Muestra())  # Asegúrate de que el objeto reactivo no sea NULL
+        reactable(Muestra())  # Renderiza el objeto reactivo en una tabla
+      })
+      
+      #################################################
+      #    Comparación de datos originales y muestra  #
+      #################################################
+      
+      output$comp_dist_MUM <- renderHighchart({
+        # Asegúrate de que tanto los datos originales como la muestra estén disponibles
+        req(data2(), Muestra(), input$variable2)
+        
+        # Calcular la densidad para los datos originales
+        dens_orig <- density(data2()[[input$variable2]], na.rm = TRUE)
+        dens_orig_df <- data.frame(x = dens_orig$x, y = dens_orig$y)
+        
+        # Calcular la densidad para la muestra
+        dens_muestra <- density(Muestra()[[input$variable2]], na.rm = TRUE)
+        dens_muestra_df <- data.frame(x = dens_muestra$x, y = dens_muestra$y)
+        
+        # Crear el gráfico de densidad comparativa
+        highchart() %>%
+          hc_add_series(name = "Datos Originales", data = list_parse(dens_orig_df), type = "area", color = "skyblue") %>%
+          hc_add_series(name = "Muestra", data = list_parse(dens_muestra_df), type = "area", color = "green") %>%
+          hc_tooltip(crosshairs = TRUE, valueDecimals = 1, shared = TRUE, borderWidth = 5) %>%
+          hc_chart(zoomType = "xy") %>%
+          hc_title(text = "Comparación de Densidades")  %>%
+          hc_exporting(enabled = TRUE)
+      })
+      
+      #################################
+      #         Descargar muestra     #
+      #################################
+      
+      observeEvent(input$show1_MUM, {
+        
+        showModal(modalDialog(
+          title = "Descargar los datos ", br(),
+          br(),
+          downloadButton("download2.1",".csv file"),
+          br(),
+          br(),
+          downloadButton("download2.2",".txt file"),
+          br(),
+          br(),
+          downloadButton("download2.3",".xlsx file"),
+          
+          footer = modalButton("Close"),
+          easyClose = TRUE)
+        )
+        
+      })
+      
+      output$download2.1 <- downloadHandler(
+        
+        
+        filename = function() {
+          paste("Muestra_MUM-", Sys.Date(), ".csv", sep="")
+        },
+        
+        content = function(file) {
+          write.csv(Muestra(), file)
+        }
+      )
+      
+      output$download2.2 <- downloadHandler(
+        
+        filename = function() {
+          paste("Muestra_MUM-", Sys.Date(), ".txt", sep="")
+        },
+        content = function(file) {
+          write.table(Muestra(), file)
+        }
+      )
+      
+      output$download2.3 <- downloadHandler(
+        filename = function() {
+          paste("Muestra_MUM-", Sys.Date(), ".xlsx", sep="")
+        },
+        content = function(file) {
+          # Suponiendo que Muestra() es una función que retorna el dataframe que quieres descargar
+          write.xlsx(Muestra(), file)
+        }
+      )
+      
+      
+    }
   })
   
-  output$download2.1 <- downloadHandler(
-    
-    
-    filename = function() {
-      paste("Muestra_MUM-", Sys.Date(), ".csv", sep="")
-    },
-    
-    content = function(file) {
-      write.csv(Muestra(), file)
-    }
-  )
   
-  output$download2.2 <- downloadHandler(
-    
-    filename = function() {
-      paste("Muestra_MUM-", Sys.Date(), ".txt", sep="")
-    },
-    content = function(file) {
-      write.table(Muestra(), file)
-    }
-  )
-  
-  output$download2.3 <- downloadHandler(
-    filename = function() {
-      paste("Muestra_MUM-", Sys.Date(), ".xlsx", sep="")
-    },
-    content = function(file) {
-      # Suponiendo que Muestra() es una función que retorna el dataframe que quieres descargar
-      write.xlsx(Muestra(), file)
-    }
-  )
-  
+
   
   
   #################################################################################
@@ -420,7 +443,7 @@ server <- function(input, output, session) {
   
   #################################################################################
   #################################################################################
-  #                          Muestreo a Juicio                                    #
+  #                          Muestreo a Juicio  LES                               #
   #################################################################################
   #################################################################################
   
@@ -472,6 +495,23 @@ server <- function(input, output, session) {
     
     
   })
+  
+  
+  
+  #################################
+  #   Condicional     #
+  #################################
+  
+  observeEvent(input$update_LES, {
+    if (input$freq2_LES >= input$freq1_LES) {
+      showModal(modalDialog(
+        title = "Advertencia",
+        "No se procede con el análisis por la mala especificación de los parámetros de los errores tolerables y esperados. Especifique bien los valores. Recordar que el valor esperado siempre debe ser inferior al error tolerable.",
+        easyClose = TRUE,
+        footer = NULL
+      ))
+    } else {
+      
   
   
   #################################
@@ -529,20 +569,26 @@ server <- function(input, output, session) {
     datos <- data3()
     
     datos_mayores <- datos[datos[[input$variable3]] > LES, ]
-    n_adicional <- n_muestra - nrow(datos_mayores)
     
-    if(n_adicional > 0) {
+    # Si hay más datos mayores que LES que el tamaño de muestra, selecciona los más grandes
+    if (nrow(datos_mayores) > n_muestra) {
+      datos_muestra <- head(datos_mayores[order(-datos_mayores[[input$variable3]]), ], n_muestra)
+    } else {
+      n_adicional <- n_muestra - nrow(datos_mayores)
       datos_menores <- datos[datos[[input$variable3]] <= LES, ]
       set.seed(reactive_seed())  # Usa la semilla aleatoria generada
-      ids_adicionales <- sample(nrow(datos_menores), n_adicional, replace = FALSE)
-      datos_adicionales <- datos_menores[ids_adicionales, ]
-      datos_muestra <- rbind(datos_mayores, datos_adicionales)
-    } else {
-      datos_muestra <- datos_mayores
+      if (nrow(datos_menores) > 0 && n_adicional > 0) {
+        ids_adicionales <- sample(nrow(datos_menores), n_adicional, replace = FALSE)
+        datos_adicionales <- datos_menores[ids_adicionales, ]
+        datos_muestra <- rbind(datos_mayores, datos_adicionales)
+      } else {
+        datos_muestra <- datos_mayores
+      }
     }
     
     return(datos_muestra)
   })
+  
   
   output$MuestraLES <- renderReactable({
     req(Muestra_2())
@@ -678,6 +724,9 @@ server <- function(input, output, session) {
       write.xlsx(Muestra_2(), file)
     }
   )
+  
+    }
+  })
   
   #################################################################################
   #################################################################################

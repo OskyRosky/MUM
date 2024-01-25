@@ -286,6 +286,8 @@ body <- dashboardBody(
                        sliderInput("freq2_MUM",
                                    "Esperado:",
                                    min = 0.01,  max = 0.99, value = 0.01), 
+                       h6("Importante: el 'Tolerable' debe siempre ser inferior al 'Esperado'. Caso contrario, desaparece el botón de 'Análisis del muestreo' por asignación incorrecta de los parámetros."),
+            
                        selectInput("distri_1", "Seleccione el nivel:",  
                                    list(`Tipo` = list("poisson",
                                                       "binomial"
@@ -296,8 +298,11 @@ body <- dashboardBody(
                        sliderInput("freq3_MUM",
                                    "Nivel de confianza:",
                                    min = 0.01,  max = 0.99, value = 0.95),
-                       br(),
-                       actionButton("update_MUM", "Análsis del muestreo.", class = "btn-primary"),
+            
+                     
+                conditionalPanel(
+                                   condition = "input.freq2_MUM < input.freq1_MUM",
+                                   actionButton("update_MUM", "Análsis del muestreo.", class = "btn-primary")),
                        br(),
                        br(),
             
@@ -371,7 +376,7 @@ body <- dashboardBody(
   
   #################################################################################
   #################################################################################
-  #                           Muestreo Juicio                                    #
+  #                              Muestreo LES                                     #
   #################################################################################
   #################################################################################
   
@@ -483,7 +488,10 @@ body <- dashboardBody(
           br(),
           h4("Valor LES.",align = "left"),
           numericInput("LES", "Valor del LES:", min = 0, value = 100000),
-          actionButton("update_LES", "Análsis del muestreo.", class = "btn-primary"),
+          
+          conditionalPanel(
+                           condition = "input.freq2_LES < input.freq1_LES",
+                            actionButton("update_LES", "Análisis del muestreo.", class = "btn-primary")),
           br(),
           br(),
           
