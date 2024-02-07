@@ -53,5 +53,7 @@ Este proyecto está bajo la Licencia MIT. Vea el archivo `LICENSE` para más det
 
 Su nombre - [@su_twitter](https://twitter.com/su_twitter)
 
+![ChatGPT](https://img.shields.io/badge/chatGPT-74aa9c?style=for-the-badge&logo=openai&logoColor=white)
+
 Link del proyecto: [https://github.com/su_usuario/su_repositorio](https://github.com/su_usuario/su_repositorio)
 **
