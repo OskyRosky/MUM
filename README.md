@@ -54,6 +54,10 @@ Este proyecto está bajo la Licencia MIT. Vea el archivo `LICENSE` para más det
 Su nombre - [@su_twitter](https://twitter.com/su_twitter)
 
 ![ChatGPT](https://img.shields.io/badge/chatGPT-74aa9c?style=for-the-badge&logo=openai&logoColor=white)
+![R](https://img.shields.io/badge/r-%23276DC3.svg?style=for-the-badge&logo=r&logoColor=white)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=for-the-badge&logo=PyTorch&logoColor=white)
+![Apache](https://img.shields.io/badge/apache-%23D42029.svg?style=for-the-badge&logo=apache&logoColor=white)
 
 Link del proyecto: [https://github.com/su_usuario/su_repositorio](https://github.com/su_usuario/su_repositorio)
 **
