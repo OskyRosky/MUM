@@ -4,6 +4,7 @@
 Este proyecto implementa una aplicación Shiny para realizar muestreo por unidades monetarias (MUM), una técnica de muestreo utilizada en auditorías para evaluar la importancia relativa de las transacciones y balances.
 
 ![LogoShiny](/Recoursos/Shinylogo.png)
+![LogoShiny2](/Recoursos/rshiby.png)
 
 ## Características
 
