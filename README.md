@@ -50,6 +50,16 @@ Si desea contribuir al proyecto, por favor:
 4. Haga Push a la rama (`git push origin feature/AmazingFeature`).
 5. Abra una Pull Request.
 
+## Sobre el proyecto
+
+Este se divide en lo que sería la intoducción, estadísticas descriptivas, el muestreo mum, muestreo les y la evaluación de la muestra. 
+
+![MUMDashboard1](/Recoursos/MUM1.png)
+![MUMDashboard2](/Recoursos/MUM2.png)
+![MUMDashboard3](/Recoursos/MUM3.png)
+![MUMDashboard4](/Recoursos/MUM4.png)
+
+
 ## Licencia
 
 Este proyecto está bajo la Licencia MIT. Vea el archivo `LICENSE` para más detalles.
