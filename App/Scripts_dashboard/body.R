@@ -57,7 +57,7 @@ body <- dashboardBody(
               tags$li(h4("Según el análisis de la distribución de la variable de interés, tener una mejor perspectiva del ajuste de la función de distribución.", align = "left"))
             ),
             br(),
-            h2("Proceso de Muestreo", align = "left", style = "font-weight: bold; text-decoration: underline;"),
+            h2("Proceso de Muestreo (MUM y LES)", align = "left", style = "font-weight: bold; text-decoration: underline;"),
             br(),
             h4("Tras un entendimiento  del conjunto de datos, se procede con la etapa del Muestreo. Esta etapa se conforma por:",align = "left"),
             br(),
@@ -258,7 +258,8 @@ body <- dashboardBody(
                        h3("Tabla de sugencia para determinar el tamaño de la muestra.",align = "left"),
                        br(),
                        h4("El tamaño de muestra depende de la capacidad operativa y las característica de la auditoría. ",align = "left"),
-                       h4("A continuación, Se presente una tabla con recomendaciones de tamaños de muestras, categorizadas en muestras de tamaño: pequeño, mediano y grande.",align = "left"),
+                       h4("A continuación, Se presente una tabla con recomendaciones de tamaños de muestras, categorizadas en muestras de tamaño: inferiores a 50, entre 50 y 100 y superiores a 
+                           a las 100 unidades de muestreo.",align = "left"),
                        br(),
                        
 
@@ -446,7 +447,8 @@ body <- dashboardBody(
           h3("Tabla de sugencia para determinar el tamaño de la muestra.",align = "left"),
           br(),
           h4("El tamaño de muestra depende de la capacidad operativa y las característica de la auditoría. ",align = "left"),
-          h4("A continuación, Se presente una tabla con recomendaciones de tamaños de muestras, categorizadas en muestras de tamaño: pequeño, mediano y grande.",align = "left"),
+          h4("A continuación, Se presente una tabla con recomendaciones de tamaños de muestras, categorizadas en muestras de tamaño: inferiores a 50, entre 50 y 100 y superiores a 
+                           a las 100 unidades de muestreo.",align = "left"),
           br(),
           
           

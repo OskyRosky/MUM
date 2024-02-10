@@ -219,7 +219,7 @@ server <- function(input, output, session) {
   
   # Datos para la tabla de sugerencias de tamaño de muestra
   sugerencias_tamaño <- data.frame(
-    `Tamaño de Muestra` = c("Pequeño (<=40)", "Mediano (50-100)", "Grande (100-400)"),
+    `Tamaño de Muestra` = c("Inferiores (<=50)", "Entre (50-100)", "Superiores (100-400)"),
     `Margen de Tolerancia (Tolerable)` = c("0.2 - 0.3", "0.03 - 0.05", "0.01 - 0.03"),
     `Error Esperado` = c("0.05 - 0.10", "0.02 - 0.05", "0.01 - 0.02"),
     `Nivel de Confianza` = c("0.90 - 0.95", "0.95 - 0.99", "> 0.99")
@@ -483,7 +483,7 @@ server <- function(input, output, session) {
   
   # Datos para la tabla de sugerencias de tamaño de muestra
   sugerencias_tamaño_2 <- data.frame(
-    `Tamaño de Muestra` = c("Pequeño (<=40)", "Mediano (50-100)", "Grande (100-400)"),
+    `Tamaño de Muestra` = c("Inferior (<=50)", "Entre (50-100)", "Superior (100)"),
     `Margen de Tolerancia (Tolerable)` = c("0.2 - 0.3", "0.03 - 0.05", "0.01 - 0.03"),
     `Error Esperado` = c("0.05 - 0.10", "0.02 - 0.05", "0.01 - 0.02"),
     `Nivel de Confianza` = c("0.90 - 0.95", "0.95 - 0.99", "> 0.99")
