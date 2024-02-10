@@ -54,11 +54,17 @@ Si desea contribuir al proyecto, por favor:
 
 Este se divide en lo que sería la intoducción, estadísticas descriptivas, el muestreo mum, muestreo les y la evaluación de la muestra. 
 
+1.  Introducción de la App
 ![MUMDashboard1](/Recoursos/MUM1.png)
-![MUMDashboard2](/Recoursos/MUM2.png)
-![MUMDashboard3](/Recoursos/MUM3.png)
-![MUMDashboard4](/Recoursos/MUM4.png)
 
+2. Análisis descriptivos de los datos
+![MUMDashboard2](/Recoursos/MUM2.png)
+
+3. Anális del MUM
+![MUMDashboard3](/Recoursos/MUM3.png)
+
+4. Evaluación de la muestra auditada
+![MUMDashboard4](/Recoursos/MUM4.png)
 
 ## Licencia
 
