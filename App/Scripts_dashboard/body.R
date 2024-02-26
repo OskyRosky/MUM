@@ -137,6 +137,7 @@ body <- dashboardBody(
                       )),
             uiOutput("variable_select_1"),
             h4("IMPORTANTE: Debe seleccionar variables numéricas.",align = "left", style = "font-weight: bold"),
+            uiOutput("negativesAlert_1"),
             br(),
             actionButton("start_analysis", "Iniciar Análisis Descriptivos", class = "btn-primary"),
             uiOutput("analysis_output"),
@@ -228,6 +229,7 @@ body <- dashboardBody(
                        br(),
                        uiOutput("variable_select_MUM"),
                        h4("IMPORTANTE: Debe seleccionar variables numéricas.",align = "left", style = "font-weight: bold"),
+                       uiOutput("negativesAlertMuestreoMUM"),
                        br(),
             #           plotOutput("histogram2"),
                        h2("Muestreo: tamaño y selección", align = "left"),
@@ -287,7 +289,7 @@ body <- dashboardBody(
                        sliderInput("freq2_MUM",
                                    "Esperado:",
                                    min = 0.01,  max = 0.99, value = 0.01), 
-                       h6("Importante: el 'Tolerable' debe siempre ser inferior al 'Esperado'. Caso contrario, desaparece el botón de 'Análisis del muestreo' por asignación incorrecta de los parámetros."),
+                       h6("Importante: el 'Tolerable' debe siempre ser superior al 'Esperado'. Caso contrario, desaparece el botón de 'Análisis del muestreo' por asignación incorrecta de los parámetros."),
             
                        selectInput("distri_1", "Seleccione el nivel:",  
                                    list(`Tipo` = list("poisson",
@@ -484,6 +486,7 @@ body <- dashboardBody(
                       )
                       )
           ),
+          h6("Importante: el 'Tolerable' debe siempre ser superior al 'Esperado'. Caso contrario, desaparece el botón de 'Análisis del muestreo' por asignación incorrecta de los parámetros."),
           sliderInput("freq3_LES",
                       "Nivel de confianza:",
                       min = 0.01,  max = 0.99, value = 0.95),

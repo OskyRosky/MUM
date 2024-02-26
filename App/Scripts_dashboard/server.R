@@ -60,6 +60,32 @@ server <- function(input, output, session) {
     }
   })
   
+  
+  # At the beginning of your server function, initialize a reactive value
+  has_negatives_1 <- reactiveVal(FALSE)
+  
+  observe({
+    # Ensure that the dataset and selected variable are available
+    req(data1(), input$variable1)
+    
+    # Check for negative values in the selected variable
+    if (any(data1()[[input$variable1]] < 0, na.rm = TRUE)) {
+      has_negatives_1(TRUE)  # Update the reactive value if negatives are found
+    } else {
+      has_negatives_1(FALSE)  # Update the reactive value if no negatives are found
+    }
+  })
+  
+  # Create an output to use in the UI for showing/hiding the alert
+  output$negativesAlert_1 <- renderUI({
+    if (has_negatives_1()) {
+      tags$div(class = "alert alert-danger", 
+               strong("¡Se detectaron valores negativos!"), "Verifique si es correcto. Caso contrario, proceda a tomar medidas.")
+    }
+  })
+  
+  # Make sure the UI can always access this output
+  outputOptions(output, 'negativesAlert_1', suspendWhenHidden = FALSE)
 
   # Genera datos binomiales
   n_binom <- 10000  # Número de observaciones
@@ -216,6 +242,33 @@ server <- function(input, output, session) {
         selectInput("variable2", "Elija una variable:", names(data2()))
       }
     })
+    
+    # Initialize a reactive value for tracking negative values in the Muestreo section
+    has_negatives_muestreo_MUM <- reactiveVal(FALSE)
+    
+    observe({
+      # Ensure that the dataset and selected variable for Muestreo are available
+      req(data2(), input$variable2)
+      
+      # Check for negative values in the selected variable for Muestreo
+      if (any(data2()[[input$variable2]] < 0, na.rm = TRUE)) {
+        has_negatives_muestreo_MUM(TRUE)  # Update if negatives are found
+      } else {
+        has_negatives_muestreo_MUM(FALSE)  # Update if no negatives are found
+      }
+    })
+    
+    # Create an output for the Muestreo negatives alert
+    output$negativesAlertMuestreoMUM <- renderUI({
+      if (has_negatives_muestreo_MUM()) {
+        tags$div(class = "alert alert-danger", 
+                 strong("¡Se detectaron valores negativos!"), "No es posible proceder con el muestreo MUM con valores o montos negativos. Procede a corregirlos para para poder proceder con el muestreo.")
+      }
+    })
+    
+    # Ensure the UI can always access this output
+    outputOptions(output, 'negativesAlertMuestreoMUM', suspendWhenHidden = FALSE)
+    
   
   # Datos para la tabla de sugerencias de tamaño de muestra
   sugerencias_tamaño <- data.frame(
