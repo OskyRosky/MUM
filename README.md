@@ -1,9 +1,42 @@
-# MUM
- Muestreo de Unidades Monetarias
+**Repository summary**
 
-**# Proyecto de Muestreo por Unidades Monetarias (MUM)
+1. Intro
+
+
+
+2. Tech Stack
+
+
+3. Features
+
+
+4. Process
+
+
+5. Learning
+
+
+6. Improvement
+
+
+7. Running the Project
+
+
+8. More
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# MUM
+## Muestreo de Unidades Monetarias
 
 Este proyecto implementa una aplicación Shiny para realizar muestreo por unidades monetarias (MUM), una técnica de muestreo utilizada en auditorías para evaluar la importancia relativa de las transacciones y balances.
+
+<table>
+  <tr>
+    <td><img src="/Recoursos/Shinylogo.png" alt="LogoShiny" style="width: 150px;"/></td>
+    <td><img src="/Recoursos/rshiny.png" alt="LogoShiny2" style="width: 150px;"/></td>
+  </tr>
+</table>
 
 ## Características
 
@@ -35,6 +68,98 @@ Asegúrese de tener instaladas las siguientes librerías de R:
 
 Puede instalarlos utilizando `install.packages("nombre_del_paquete")`.
 
+## Código principal
+
+La app recibdo todos los elementos del shiny en el archivo AppAuditSample.R
+
+```r
+#####################################################################
+#                                                                    #
+#                                                                    #
+#                     Muestreo financiero                            #
+#                                                                    #   
+#                                                                    #
+######################################################################
+
+#######################
+#  Opciones generales # 
+#######################
+
+options(shiny.maxRequestSize = 100 * 1024 * 1024)
+options(encoding="utf-8") 
+options(scipen=999)
+
+################
+#  Directorio  #
+################
+
+
+setwd("C:/Users/Oscar Centeno/Desktop/Oscar/CGR/2024/MUM/App/Scripts_dashboard")
+
+#################
+#   Librerias   # 
+#################
+
+suppressWarnings(source("Librerias.R"))
+
+###################################
+#     Creacion del dashboard      # 
+###################################
+############################
+#          header          # 
+############################
+
+suppressWarnings(source("header.R"))
+
+############################
+#          sidebar         # 
+############################
+
+suppressWarnings(source("sider.R"))
+
+
+############################
+#          body            # 
+############################
+
+suppressWarnings(source("body.R"))
+
+##########################################################
+#                Contenido del ui                        # 
+##########################################################
+
+suppressWarnings(source("ui.R"))
+
+##########################################################
+#                Contenido del server                    # 
+##########################################################
+
+suppressWarnings(source("server.R"))
+
+
+###################################
+#     Cargar la App de Shiny      # 
+###################################
+
+#require(shiny)
+
+x <- system("ipconfig", intern=TRUE)
+z <- x[grep("IPv4", x)]
+ip <- gsub(".*? ([[:digit:]])", "\\1", z)
+
+print(paste0("the Shiny Web application runs on: http://", ip, ":7701/"))
+
+#runApp( "AppAuditSample.R", host = "localhost", port = 80, launch.browser = FALSE, display.mode = "fullscreen" ) #, port = 7704 , host = ip
+                                                             # )
+runApp(list(ui=ui, server=server),  host = getOption("shiny.host", "127.0.0.2"), port = 1001,launch.browser = TRUE)
+
+###########
+## Run App  
+###########
+
+#shinyApp(ui, server)
+```
+
 ## Contribuir
 
 Si desea contribuir al proyecto, por favor:
@@ -44,6 +169,22 @@ Si desea contribuir al proyecto, por favor:
 3. Realice commit de sus cambios (`git commit -m 'Añadida una increíble característica'`).
 4. Haga Push a la rama (`git push origin feature/AmazingFeature`).
 5. Abra una Pull Request.
+
+## Sobre el proyecto
+
+Este se divide en lo que sería la intoducción, estadísticas descriptivas, el muestreo mum, muestreo les y la evaluación de la muestra. 
+
+1.  Introducción de la App
+![MUMDashboard1](/Recoursos/MUM1.png)
+
+2. Análisis descriptivos de los datos
+![MUMDashboard2](/Recoursos/MUM2.png)
+
+3. Anális del MUM
+![MUMDashboard3](/Recoursos/MUM3.png)
+
+4. Evaluación de la muestra auditada
+![MUMDashboard4](/Recoursos/MUM4.png)
 
 ## Licencia
 
