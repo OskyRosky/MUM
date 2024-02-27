@@ -235,6 +235,10 @@ server <- function(input, output, session) {
       )
     })
     
+    ##################################################
+    #         Alerta para valores negativos  en MUM  #
+    ##################################################
+    
     output$variable_select_MUM <- renderUI({
       if (is.null(data2())) {
         return(NULL)
@@ -270,6 +274,10 @@ server <- function(input, output, session) {
     outputOptions(output, 'negativesAlertMuestreoMUM', suspendWhenHidden = FALSE)
     
   
+    ##################################################
+    #              Tablas de referencia              #
+    ##################################################
+    
   # Datos para la tabla de sugerencias de tamaño de muestra
   sugerencias_tamaño <- data.frame(
     `Tamaño de Muestra` = c("Inferiores (<=50)", "Entre (50-100)", "Superiores (100-400)"),
@@ -299,6 +307,12 @@ server <- function(input, output, session) {
   #################################
   #   Condicional     #
   #################################
+  
+  output$hasNegatives_MUM <- reactive({
+    has_negatives_muestreo_MUM()  # Esta es tu variable reactiva que ya tienes definida
+  })
+  shiny::outputOptions(output, "hasNegatives_MUM", suspendWhenHidden = FALSE)
+  
   
   observeEvent(input$update_MUM, {
     if (input$freq2_MUM >= input$freq1_MUM) {
@@ -485,14 +499,6 @@ server <- function(input, output, session) {
   })
   
   
-
-  
-  
-  #################################################################################
-  #################################################################################
-  #
-  #################################################################################
-  #################################################################################
   
   #################################################################################
   #################################################################################
@@ -534,6 +540,50 @@ server <- function(input, output, session) {
   })
   
   
+  ##################################################
+  #         Alerta para valores negativos  en MUM  #
+  ##################################################
+  
+  output$variable_select_LES <- renderUI({
+    if (is.null(data3())) {
+      return(NULL)
+    } else {
+      selectInput("variable3", "Elija una variable:", names(data3()))
+    }
+  })
+  
+  # Initialize a reactive value for tracking negative values in the Muestreo section
+  has_negatives_muestreo_LES <- reactiveVal(FALSE)
+  
+  observe({
+    # Ensure that the dataset and selected variable for Muestreo are available
+    req(data3(), input$variable3)
+    
+    # Check for negative values in the selected variable for Muestreo
+    if (any(data3()[[input$variable3]] < 0, na.rm = TRUE)) {
+      has_negatives_muestreo_LES(TRUE)  # Update if negatives are found
+    } else {
+      has_negatives_muestreo_LES(FALSE)  # Update if no negatives are found
+    }
+  })
+  
+  # Create an output for the Muestreo negatives alert
+  output$negativesAlertMuestreoLES <- renderUI({
+    if (has_negatives_muestreo_LES()) {
+      tags$div(class = "alert alert-danger", 
+               strong("¡Se detectaron valores negativos!"), "No es posible proceder con el muestreo LES con valores o montos negativos. Procede a corregirlos para para poder proceder con el muestreo.")
+    }
+  })
+  
+  # Ensure the UI can always access this output
+  outputOptions(output, 'negativesAlertMuestreoLES', suspendWhenHidden = FALSE)
+  
+  
+  
+  ##################################################
+  #              Tablas de referencia              #
+  ##################################################
+  
   # Datos para la tabla de sugerencias de tamaño de muestra
   sugerencias_tamaño_2 <- data.frame(
     `Tamaño de Muestra` = c("Inferior (<=50)", "Entre (50-100)", "Superior (100)"),
@@ -554,6 +604,11 @@ server <- function(input, output, session) {
   #################################
   #   Condicional     #
   #################################
+  
+  output$hasNegatives_LES <- reactive({
+    has_negatives_muestreo_LES()  # Esta es tu variable reactiva que ya tienes definida
+  })
+  shiny::outputOptions(output, "hasNegatives_LES", suspendWhenHidden = FALSE)
   
   observeEvent(input$update_LES, {
     if (input$freq2_LES >= input$freq1_LES) {

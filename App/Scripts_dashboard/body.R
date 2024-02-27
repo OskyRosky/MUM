@@ -189,7 +189,7 @@ body <- dashboardBody(
     
     #################################################################################
     #################################################################################
-    #                                  Muestreo                                     #
+    #                                  Muestreo MUM                                 #
     #################################################################################
     #################################################################################
     
@@ -303,9 +303,9 @@ body <- dashboardBody(
                                    min = 0.01,  max = 0.99, value = 0.95),
             
                      
-                conditionalPanel(
-                                   condition = "input.freq2_MUM < input.freq1_MUM",
-                                   actionButton("update_MUM", "Análsis del muestreo.", class = "btn-primary")),
+                      conditionalPanel(
+                             condition = "(!output.hasNegatives_MUM) && (input.freq2_MUM < input.freq1_MUM)",
+                             actionButton("update_MUM", "Análisis del muestreo.", class = "btn-primary")),
                        br(),
                        br(),
             
@@ -419,6 +419,7 @@ body <- dashboardBody(
           br(),
           uiOutput("variable_select_LES"),
           h4("IMPORTANTE: Debe seleccionar variables numéricas.",align = "left", style = "font-weight: bold"),
+          uiOutput("negativesAlertMuestreoLES"),
           br(),
           #           plotOutput("histogram2"),
           h2("Muestreo: tamaño y selección", align = "left"),
@@ -495,8 +496,9 @@ body <- dashboardBody(
           numericInput("LES", "Valor del LES:", min = 0, value = 100000),
           
           conditionalPanel(
-                           condition = "input.freq2_LES < input.freq1_LES",
-                            actionButton("update_LES", "Análisis del muestreo.", class = "btn-primary")),
+                               condition = "(!output.hasNegatives_LES) && (input.freq2_LES < input.freq1_LES)",
+                               actionButton("update_LES", "Análisis del muestreo.", class = "btn-primary")
+          ),
           br(),
           br(),
           
