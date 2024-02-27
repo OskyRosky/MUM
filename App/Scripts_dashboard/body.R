@@ -597,7 +597,30 @@ body <- dashboardBody(
           
           
           ),
+  
+  #################################################################################
+  #################################################################################
+  #                           Muestra atributos                                   #
+  #################################################################################
+  #################################################################################
+  tabItem(tabName = "p5",
           
+          
+          h1("Muestreo por atributos.", align = "center"),
+          br(),
+          h2("En este sección:", align = "left"),
+          br(),
+          h4("Una vez cargada la información, y seleccionadas las variables correspondientes a los datos observados y auditados,  usted podrá:"),
+          br(),
+          tags$ul(
+            style = "list-style-type: disc; padding-left: 20px;",  # Estilo para la lista: disc es una viñeta redonda
+            tags$li(h4("Comparar la información de los datos observados vs los datos auditados.", align = "left")),
+            tags$li(h4("De forma descriptiva, valorar las diferencias.", align = "left")),
+            tags$li(h4("Analizar ciertos Indicadores de Riesgo en el proceso de comparación entre la información de los datos observados vs los datos auditados.", align = "left",)),
+            tags$li(h4("Evaluar criterios empíricos en la determinación del umbral máximo permitido o tolerable.", align = "left"))
+          ),
+          br() 
+  ),
   
   #################################################################################
   #################################################################################
@@ -605,7 +628,7 @@ body <- dashboardBody(
   #################################################################################
   #################################################################################
   
-  tabItem(tabName = "p5",
+  tabItem(tabName = "p6",
           
           
           h1("Evaluación de la auditoría.", align = "center"),
