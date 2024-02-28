@@ -187,11 +187,11 @@ body <- dashboardBody(
     ),
     
     
-    #################################################################################
-    #################################################################################
-    #                                  Muestreo MUM                                 #
-    #################################################################################
-    #################################################################################
+    ##############################################################################################################
+    ##############################################################################################################
+    #                                               Muestreo MUM                                                 #
+    ##############################################################################################################
+    ##############################################################################################################
     
     tabItem(tabName = "p3",
                        
@@ -377,11 +377,11 @@ body <- dashboardBody(
   ),
   
   
-  #################################################################################
-  #################################################################################
-  #                              Muestreo LES                                     #
-  #################################################################################
-  #################################################################################
+  ##############################################################################################################
+  ##############################################################################################################
+  #                                               Muestreo LES                                                 #
+  ##############################################################################################################
+  ##############################################################################################################
   
   tabItem(tabName = "p4",
           
@@ -598,35 +598,182 @@ body <- dashboardBody(
           
           ),
   
-  #################################################################################
-  #################################################################################
-  #                           Muestra atributos                                   #
-  #################################################################################
-  #################################################################################
+         ##############################################################################################################
+         ##############################################################################################################
+         #                                               Muestreo Atribuos                                            #
+         ##############################################################################################################
+         ##############################################################################################################
   tabItem(tabName = "p5",
           
           
           h1("Muestreo por atributos.", align = "center"),
           br(),
-          h2("En este sección:", align = "left"),
+          h2("Se lleva a cabo el proceso de muestreo por atribuross: tamaño y selección de la unidades.", align = "left"),
           br(),
           h4("Una vez cargada la información, y seleccionadas las variables correspondientes a los datos observados y auditados,  usted podrá:"),
           br(),
           tags$ul(
             style = "list-style-type: disc; padding-left: 20px;",  # Estilo para la lista: disc es una viñeta redonda
-            tags$li(h4("Comparar la información de los datos observados vs los datos auditados.", align = "left")),
-            tags$li(h4("De forma descriptiva, valorar las diferencias.", align = "left")),
-            tags$li(h4("Analizar ciertos Indicadores de Riesgo en el proceso de comparación entre la información de los datos observados vs los datos auditados.", align = "left",)),
-            tags$li(h4("Evaluar criterios empíricos en la determinación del umbral máximo permitido o tolerable.", align = "left"))
+            tags$li(h4("Detarminar los niveles de error tolerable , esperado y nivel de cobfianza", align = "left")),
+            tags$li(h4("COMPLETAR.", align = "left"))
+            ),
+          br(),
+          h3("Cargar datos", align = "left"),
+          br(),
+          fileInput("file4", "Importar datos del muestreo",
+                    accept =  c(
+                      ".csv",
+                      ".txt",
+                      ".xlsx",
+                      "text/csv",
+                      "text/plain",
+                      "text/tab-separated-values",
+                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )),
+          br(),
+          uiOutput("variable_select_Atri"),
+          h4("IMPORTANTE: Debe seleccionar variables de atributo.",align = "left", style = "font-weight: bold"),
+          # METER ACA LA ADVERTENCIA 
+          br(),
+          #           plotOutput("histogram2"),
+          h2("Muestreo: tamaño y selección", align = "left"),
+          br(),
+          h4("El proceso de muestreo consta de dos etapas: selección del tamaño de la muestra y la selección de las unidades",align = "left"),
+          h4("Se aborda primeramente la determinación del tamaño de la muestra. Se deberán seleccionar el tamaño según la elección de los parámetros de erores tolarebles, esperados u nivel de confianza."),  
+          h4("La selección de las unidades para completar el tamaño de muestra, se visualiza en términos de una tabla. Se aplicó el método de selección Proporcional Por Tamaño, la cual brinda mayor probabilidad de ser seleccinadas a las unidades con montos mayores."),
+          br(),
+          h3("Cálculo de tamaño de muestra"),
+          br(),
+          h4("Cuando estás determinando el tamaño de una muestra para tu estudio, hay varios factores clave a considerar
+                          que influyen directamente en la cantidad de datos que necesitas recolectar:",align = "left"),
+          br(),
+          h4("Margen de Tolerancia (Tolerable)",align = "left", style = "font-weight: bold"),
+          h4("Este valor representa el máximo error de estimación que estás dispuesto a aceptar
+                          en tus resultados. Un margen mayor sugiere que estás tolerando una mayor incertidumbre, lo que puede resultar en una
+                          muestra más pequeña. En contraste, un margen más ajustado requiere una muestra más grande para garantizar que tus estimaciones
+                          estén dentro de ese rango estrecho.",align = "left"),
+          h4("Error Esperado (Esperado)",align = "left", style = "font-weight: bold"),
+          h4("Este es el error que anticipas podría existir en tu población. Un valor más alto implica que esperas
+                          más variabilidad en los datos, lo que se traduce en necesitar una muestra más grande para obtener estimaciones precisas.",align = "left"),
+          h4("Nivel de Confianza",align = "left", style = "font-weight: bold"),
+          h4("Cuanto mayor sea el nivel de confianza que desees tener en los resultados de tu muestra, mayor deberá
+                          ser el tamaño de la misma. Esto se debe a que un nivel de confianza más alto indica que quieres estar más seguro de que tu 
+                          muestra representa correctamente a toda la población.",align = "left"),
+          
+          br(),
+          h3("Tabla de sugencia para determinar el tamaño de la muestra.",align = "left"),
+          br(),
+          h4("El tamaño de muestra depende de la capacidad operativa y las característica de la auditoría. ",align = "left"),
+          h4("A continuación, Se presente una tabla con recomendaciones de tamaños de muestras, categorizadas en muestras de tamaño: inferiores a 50, entre 50 y 100 y superiores a 
+                           a las 100 unidades de muestreo.",align = "left"),
+          br(),
+          
+          
+          fluidRow(
+            box(
+              title = "Tabla de Datos",
+              status = "primary",
+              solidHeader = TRUE,
+              collapsible = TRUE,
+              width = 8,  # Ocupará todo el ancho disponible
+              div(style = "height: 180px;",  # Establece el alto de la tabla
+                  reactableOutput("SugerenciasTamaño_Atri")
+              )
+            )
           ),
-          br() 
+          
+          h4("Utilizando los controles deslizantes de tu aplicación, los usuarios pueden ajustar estos parámetros para determinar un tamaño 
+                          de muestra que sea adecuado para sus necesidades específicas.",align = "left"),
+          br(),
+          h4("Nota: defina los parámetros, y luego presione sobre 'Análisis de muestreo. Recuerde la distribución aproximada de la sección 'Descriptivo'." ,align = "left"),
+          sliderInput("freq1_Atri",
+                      "Tolerable:",
+                      min = 0.01,  max = 0.99, value = 0.05),
+          sliderInput("freq2_Atri",
+                      "Esperado:",
+                      min = 0.01,  max = 0.99, value = 0.01), 
+          selectInput("distri_3", "Seleccione el nivel:",  
+                      list(`Tipo` = list("poisson",
+                                         "binomial"
+                                         
+                      )
+                      )
+          ),
+          h6("Importante: el 'Tolerable' debe siempre ser superior al 'Esperado'. Caso contrario, desaparece el botón de 'Análisis del muestreo' por asignación incorrecta de los parámetros."),
+          sliderInput("freq3_Atri",
+                      "Nivel de confianza:",
+                      min = 0.01,  max = 0.99, value = 0.95),
+          br(),
+
+          
+          conditionalPanel(
+            condition = "(input.freq2_Atri < input.freq1_Atri)",
+            actionButton("update_Atri", "Análisis del muestreo.", class = "btn-primary")
+          ),
+          br(),
+          br(),
+          
+          ########################
+          # Tamaño de la muestra #
+          ########################
+          
+          fluidRow(
+            box(
+              solidHeader = TRUE, 
+              status = "primary",
+              collapsible = TRUE,
+              width = 8,
+              reactableOutput("SampleSize_Atri")  
+            )
+          ),
+          br(),
+
+          #######################
+          # Valor de la semilla #
+          #######################
+          
+          fluidRow(
+            box(
+              solidHeader = TRUE, 
+              status = "primary",
+              collapsible = TRUE,
+              width = 8,
+              reactableOutput("seedvalue_Atri")  
+            )
+          ),
+          br(),
+          br(),
+          
+          ######################## 
+          # Muestra seleccionada 
+          ########################
+          
+          fluidRow(
+            box(
+              solidHeader = TRUE, 
+              status = "primary",
+              collapsible = TRUE,
+              width = 8,
+              reactableOutput("tablaMuestraAtri")  
+            )
+          ),
+          br(),
+          
+          #################################################
+          #    Comparación de datos originales y muestra  #
+          #################################################
+          
+          #################################
+          #         Descargar muestra     #
+          #################################
+          
   ),
   
-  #################################################################################
-  #################################################################################
-  #                                  Evaluación                                   #
-  #################################################################################
-  #################################################################################
+  ##############################################################################################################
+  ##############################################################################################################
+  #                                                  Evaluación                                                #
+  ##############################################################################################################
+  ##############################################################################################################
   
   tabItem(tabName = "p6",
           

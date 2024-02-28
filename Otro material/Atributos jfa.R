@@ -2,6 +2,8 @@
 #     Muestreo por categoría en Auditoria ---- jfa   #
 ######################################################
 
+install.packages("openxlsx")
+
 #################################
 #       Test te muestreo        #
 #################################
@@ -14,24 +16,26 @@ options(scipen=999)
 #################
 
 library(jfa)
-
+library(openxlsx)
 
 #######################
 #   Generar la data   #
 #######################
 
-set.seed(123456) # Para asegurar reproducibilidad
+set.seed(123) # Para asegurar reproducibilidad
 
-# Generamos un DataFrame con 1000 filas y las columnas especificadas
+# Generamos un DataFrame con 10,000 filas y las columnas especificadas
+n <- 10000
 df <- data.frame(
-  Id = 1:1000,
-  Monto = rgamma(1000, shape = 2, scale = 100), # Distribución con asimetría
-  País = sample(c("País A", "País B", "País C", "País D", "País E"), 1000, replace = TRUE),
-  Resultado = sample(c("Adecuado", "Rechazado"), 1000, replace = TRUE)
+  Id = 1:n,
+  Monto = rgamma(n, shape = 2, scale = 100), # Distribución con asimetría
+  País = rep(c("País A", "País B", "País C", "País D", "País E"), times = c(5000, 1500, 1500, 1500, 500)),
+  Resultado = sample(c(rep("Adecuado", 7000), rep("Rechazado", 3000)), n, replace = FALSE)
 )
 
 # Visualizamos las primeras filas del DataFrame
 head(df,20)
+tail(df,20)
 
 ##################################
 #  Calculo de tamaño de muestra  #
@@ -51,3 +55,8 @@ Muestra_atri <- planning(materiality = 0.2,
 
 Muestra <- data.frame(`Muestra` = Muestra_atri$n)
 Muestra
+
+# Exportamos el DataFrame a un archivo .xlsx
+
+setwd("C:/Users/Oscar Centeno/Desktop/Oscar/CGR/2024/MUM/App/data")
+write.xlsx(df, file = "Atributos.xlsx")

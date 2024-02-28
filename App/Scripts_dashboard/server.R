@@ -836,11 +836,150 @@ server <- function(input, output, session) {
     }
   })
   
-  #################################################################################
-  #################################################################################
-  #                                  Evaluación                                   #
-  #################################################################################
-  #################################################################################
+  ###########################################################################################################
+  ###########################################################################################################
+  #                                             Muestreo Atributos                                          #
+  ###########################################################################################################
+  ###########################################################################################################
+  
+  ##############################
+  #          Importar Datos    #
+  ##############################
+  
+  # Data la volvemos un objeto reactivo 
+  #  data ---> data()
+  
+  data4 <- reactive({
+    inFile <- input$file4
+    if (is.null(inFile)) {
+      return(NULL)
+    }
+    
+    ext <- tools::file_ext(inFile$datapath)
+    
+    # Dependiendo de la extensión del archivo, usar la función correspondiente
+    switch(ext,
+           csv = read.csv(inFile$datapath, stringsAsFactors = FALSE),
+           txt = read.delim(inFile$datapath, stringsAsFactors = FALSE),
+           xlsx = read_excel(inFile$datapath),
+           stop("Tipo de archivo no soportado")
+    )
+  })
+  
+  output$variable_select_Atri <- renderUI({
+    if (is.null(data4())) {
+      return(NULL)
+    } else {
+      selectInput("variable4", "Elija una variable:", names(data4()))
+    }
+  })
+  
+  ##################################################
+  #              Tablas de referencia              #
+  ##################################################
+  
+  # Datos para la tabla de sugerencias de tamaño de muestra
+  sugerencias_tamaño_3 <- data.frame(
+    `Tamaño de Muestra` = c("Inferior (<=50)", "Entre (50-100)", "Superior (100)"),
+    `Margen de Tolerancia (Tolerable)` = c("0.2 - 0.3", "0.03 - 0.05", "0.01 - 0.03"),
+    `Error Esperado` = c("0.05 - 0.10", "0.02 - 0.05", "0.01 - 0.02"),
+    `Nivel de Confianza` = c("0.90 - 0.95", "0.95 - 0.99", "> 0.99")
+  )
+  
+  # Genera la tabla reactiva
+  output$SugerenciasTamaño_Atri <- renderReactable({
+    reactable(sugerencias_tamaño_3, bordered = TRUE, highlight = TRUE)
+    
+    
+  })
+  
+  #################################
+  #    Cálculo tamaño muestra     #
+  #################################
+  
+  # Objeto reactivo para el tamaño de muestra
+  sample_size <- reactiveVal()  # Inicializa como un valor reactivo
+  
+  observeEvent(input$update_Atri, {  # Cuando 'update' se presiona, se ejecuta el código dentro de observeEvent
+    stage1 <- planning(materiality = input$freq1_Atri, 
+                       expected = input$freq2_Atri,
+                       likelihood = input$distri_3, 
+                       conf.level = input$freq3_Atri
+    )
+    
+    sample_size(data.frame(`Muestra` = stage1$n))  # Asigna el valor al reactivo
+  })
+  
+  # Renderizar la tabla de tamaño de muestra
+  output$SampleSize_Atri <- renderReactable({
+    req(sample_size())  # Asegúrate de que el valor reactivo no sea NULL
+    reactable(sample_size())  # Renderiza el valor reactivo en una tabla
+  })
+  
+
+  
+  ########################################
+  #    Selección unidades por Atributos  #
+  ########################################
+  
+  #################################
+  #    Valor de la semilla Atri   #
+  #################################
+  
+  
+  # Función reactiva para generar y almacenar la semilla
+  reactive_seed <- reactiveVal()  # Inicializa como un valor reactivo
+  
+  observeEvent(input$update_Atri, {  # Actualiza la semilla cuando se presiona 'update'
+    seed_number <- sample(1:100000, 1)  # Genera un número aleatorio entre 1 y 100000
+    reactive_seed(seed_number)  # Asigna el número a reactive_seed
+  })
+  
+  
+  # Crear una tabla reactiva para mostrar la semilla
+  output$seedvalue_Atri <- renderReactable({
+    req(reactive_seed())  # Asegúrate de que la semilla no sea NULL
+    reactable(data.frame(`Semilla` = reactive_seed()))  # Muestra la semilla en una tabla
+  })
+  
+  #################################
+  #   Selección de las unidades   #
+  #################################
+  
+  # Asigna los datos cargados a una variable reactiva para su uso
+  MuestraAtri <- reactive({
+    req(data4())
+  })
+  
+  # Observa cuando el usuario presiona el botón de "Análisis del muestreo"
+  observeEvent(input$update_Atri, {
+    
+    # Asegura que los datos estén disponibles
+    req(MuestraAtri())
+    
+
+    
+    # Renderiza la tabla con los datos cargados
+    output$tablaMuestraAtri <- renderReactable({
+      reactable(MuestraAtri())
+    })
+  })
+  
+  
+  #################################################
+  #    Comparación de datos originales y muestra  #
+  #################################################
+  
+  #################################################
+  #     Descargar datos del muestreo por LES      #
+  #################################################
+  
+  
+  ###########################################################################################################
+  ###########################################################################################################
+  #                                               Evaluación                                                #
+  ###########################################################################################################
+  ###########################################################################################################
   
   ###### Datos a reactive 
   
