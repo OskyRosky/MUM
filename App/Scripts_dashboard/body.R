@@ -760,12 +760,72 @@ body <- dashboardBody(
           br(),
           
           #################################################
+          #             Tabla con porcentaje              #
+          #################################################
+          
+          fluidRow(
+            box(
+              title = "Tabla de Origen con Porcentaje",
+              status = "primary",
+              solidHeader = TRUE,
+              collapsible = TRUE,
+              width = 12,  # Ajusta según necesidad
+              reactableOutput("tablaOrigenPorceOut") # Este ID debe coincidir con el usado en server.R
+            )
+          ),
+          br(),
+          
+          
+          fluidRow(
+            box(
+              title = "Tabla de Origen con Porcentaje",
+              status = "primary",
+              solidHeader = TRUE,
+              collapsible = TRUE,
+              width = 12,  # Ajusta según necesidad
+              reactableOutput("tablaMuestraPorce") # Este ID debe coincidir con el usado en server.R
+            )
+          ),
+          br(),
+          
+          
+          #################################################
           #    Comparación de datos originales y muestra  #
           #################################################
+          
+          fluidRow(
+            box(
+              title = "Gráfico Comparativo",
+              solidHeader = TRUE, 
+              status = "primary",
+              collapsible = TRUE,
+              width = 12, # Ajusta según sea necesario para el diseño de tu UI
+              highchartOutput("graficoComparativo")  # Cambia a highchartOutput para gráficos Highcharter
+            )
+          ),
+          br(),
+          
+          fluidRow(
+            box(
+              title = "Gráfico Comparativo entre original y muestra",
+              solidHeader = TRUE, 
+              status = "primary",
+              collapsible = TRUE,
+              width = 12, # Ajusta según sea necesario para el diseño de tu UI
+              highchartOutput("graficoComparativo2")  # Cambia a highchartOutput para gráficos Highcharter
+            )
+          ),
+          br(),
           
           #################################
           #         Descargar muestra     #
           #################################
+          
+          h3("Descargar la muestra seleccionada"),
+          br(),
+          actionButton("show1_Atri", "Descargar archivo")
+          
+        
           
   ),
   
