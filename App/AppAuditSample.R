@@ -13,6 +13,7 @@
 options(shiny.maxRequestSize = 100 * 1024 * 1024)
 options(encoding="utf-8") 
 options(scipen=999)
+set.seed(Sys.time())
 
 ################
 #  Directorio  #

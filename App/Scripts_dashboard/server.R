@@ -353,6 +353,7 @@ server <- function(input, output, session) {
       #    Valor de la semilla MUM    #
       #################################
       
+      set.seed(Sys.time())
       
       # Función reactiva para generar y almacenar la semilla
       reactive_seed <- reactiveVal()  # Inicializa como un valor reactivo
@@ -705,6 +706,8 @@ server <- function(input, output, session) {
   #    Valor de la semilla MUM    #
   #################################
   
+  set.seed(Sys.time())
+  
   # Función reactiva para generar y almacenar la semilla
   reactive_seed <- reactiveVal()  # Inicializa como un valor reactivo
   
@@ -923,6 +926,7 @@ server <- function(input, output, session) {
   #    Valor de la semilla Atri   #
   #################################
   
+  set.seed(Sys.time())
   
   # Función reactiva para generar y almacenar la semilla
   reactive_seed <- reactiveVal()  # Inicializa como un valor reactivo
@@ -1001,47 +1005,47 @@ server <- function(input, output, session) {
   
   
   # Para visualizar la tabla origianl 
-  observeEvent(input$update_Atri, {
-    output$tablaOrigenPorceOut <- renderReactable({
-      req(tablaOrigenPorce()) 
-      reactable(tablaOrigenPorce())
-    })
-  })
+  #  observeEvent(input$update_Atri, {
+  #  output$tablaOrigenPorceOut <- renderReactable({
+  #    req(tablaOrigenPorce()) 
+  #    reactable(tablaOrigenPorce())
+  #  })
+  # })
   
   # Para visualizar la tabla muestra en la UI
   
-  observeEvent(input$update_Atri, {
-    output$tablaMuestraPorce <- renderReactable({
-      req(tablaMuestraPorce()) 
-      reactable(tablaMuestraPorce())
-    })
-  })
+  #  observeEvent(input$update_Atri, {
+  #  output$tablaMuestraPorce <- renderReactable({
+  #    req(tablaMuestraPorce()) 
+  #    reactable(tablaMuestraPorce())
+  #  })
+  #  })
   
 
   ###########################################################
   #   Gráfico de Comparación de datos originales y muestra  #
   ###########################################################
   
-  observeEvent(input$update_Atri, {
-    output$graficoComparativo <- renderHighchart({
-      req(tablaOrigenPorce()) 
+  #  observeEvent(input$update_Atri, {
+  #  output$graficoComparativo <- renderHighchart({
+  #    req(tablaOrigenPorce()) 
       
-      datos <- tablaOrigenPorce()
+  #   datos <- tablaOrigenPorce()
       
       # Asegúrate de que los datos tienen las columnas 'Categoria' y 'Porcentaje'
-      if("Categoria" %in% names(datos) && "Porcentaje" %in% names(datos)) {
-        highchart() %>%
-          hc_chart(type = "bar") %>%
-          hc_title(text = "Distribución de Porcentajes por Categoría") %>%
-          hc_xAxis(categories = datos$Categoria) %>%
-          hc_yAxis(title = list(text = "Porcentaje"), labels = list(format = "{value}%")) %>%
-          hc_add_series(name = "Porcentaje", data = datos$Porcentaje) %>%
-          hc_plotOptions(column = list(dataLabels = list(enabled = TRUE, format = '{y}%')))
-      } else {
-        stop("Las columnas 'Categoria' y 'Porcentaje' no están presentes en los datos.")
-      }
-    })
-  })
+  #   if("Categoria" %in% names(datos) && "Porcentaje" %in% names(datos)) {
+  #      highchart() %>%
+  #        hc_chart(type = "bar") %>%
+  #        hc_title(text = "Distribución de Porcentajes por Categoría") %>%
+  #        hc_xAxis(categories = datos$Categoria) %>%
+  #        hc_yAxis(title = list(text = "Porcentaje"), labels = list(format = "{value}%")) %>%
+  #        hc_add_series(name = "Porcentaje", data = datos$Porcentaje) %>%
+  #       hc_plotOptions(column = list(dataLabels = list(enabled = TRUE, format = '{y}%')))
+  #    } else {
+  #      stop("Las columnas 'Categoria' y 'Porcentaje' no están presentes en los datos.")
+  #    }
+  #  })
+  #  })
   
   # Ambos
   

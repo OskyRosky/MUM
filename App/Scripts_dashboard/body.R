@@ -69,6 +69,18 @@ body <- dashboardBody(
               tags$li(h4("Descargar los datos seleccionados en el proceso de muestreo (obtenidos por la muestra).", align = "left"))
             ),
             br(),
+            h2("Muestreo por Atriburos", align = "left", style = "font-weight: bold; text-decoration: underline;"),
+            br(),
+            h4("Se explicar el obtener una muestra a partir de una variable de atributo. Esta etapa se conforma por:",align = "left"),
+            br(),
+            tags$ul(
+              style = "list-style-type: disc; padding-left: 20px;",  # Estilo para la lista: disc es una viñeta redonda
+              tags$li(h4("Determinar el tamaño de muestra.", align = "left")),
+              tags$li(h4("Visualizar la selección de los casos (filas) según la determinación del tamaño de muestra.", align = "left")),
+              tags$li(h4("Comparar los porcentajes de las categorías entre los datos orginales y los obtenidos por la muestra.", align = "left")),
+              tags$li(h4("Descargar los datos seleccionados en el proceso de muestreo (obtenidos por la muestra).", align = "left"))
+            ),
+            br(),
             h2("Evaluación de la Muestra", align = "left", style = "font-weight: bold; text-decoration: underline;"),
             br(),
             h4("El último módulo es para obtener un contraste empírico referente al proceso de la auditoria de la muestra obtenida con anterioridad.",align = "left"),
@@ -615,7 +627,10 @@ body <- dashboardBody(
           tags$ul(
             style = "list-style-type: disc; padding-left: 20px;",  # Estilo para la lista: disc es una viñeta redonda
             tags$li(h4("Detarminar los niveles de error tolerable , esperado y nivel de cobfianza", align = "left")),
-            tags$li(h4("COMPLETAR.", align = "left"))
+            tags$li(h4("Determinar el tamaño de muestra.", align = "left")),
+            tags$li(h4("Visualizar la muestra seleccionada.", align = "left")),
+            tags$li(h4("Comparar los porcentajes de las categorías para los datos originales y los seleccionados por la muestra.", align = "left")),
+            tags$li(h4("Descagar la muestra seleccionada.", align = "left")),
             ),
           br(),
           h3("Cargar datos", align = "left"),
@@ -716,7 +731,7 @@ body <- dashboardBody(
           ########################
           # Tamaño de la muestra #
           ########################
-          
+          h3("Tamaño de la muestra.",align = "left"),
           fluidRow(
             box(
               solidHeader = TRUE, 
@@ -731,7 +746,7 @@ body <- dashboardBody(
           #######################
           # Valor de la semilla #
           #######################
-          
+          h4("Semilla del proceso de selección.",align = "left"),
           fluidRow(
             box(
               solidHeader = TRUE, 
@@ -747,7 +762,7 @@ body <- dashboardBody(
           ######################## 
           # Muestra seleccionada 
           ########################
-          
+          h3("Muestra seleccionada.",align = "left"),
           fluidRow(
             box(
               solidHeader = TRUE, 
@@ -763,48 +778,48 @@ body <- dashboardBody(
           #             Tabla con porcentaje              #
           #################################################
           
-          fluidRow(
-            box(
-              title = "Tabla de Origen con Porcentaje",
-              status = "primary",
-              solidHeader = TRUE,
-              collapsible = TRUE,
-              width = 12,  # Ajusta según necesidad
-              reactableOutput("tablaOrigenPorceOut") # Este ID debe coincidir con el usado en server.R
-            )
-          ),
-          br(),
+          #          fluidRow(
+          #  box(
+          #    title = "Tabla de Origen con Porcentaje",
+          #    status = "primary",
+          #    solidHeader = TRUE,
+          #    collapsible = TRUE,
+          #    width = 12,  # Ajusta según necesidad
+          #    reactableOutput("tablaOrigenPorceOut") # Este ID debe coincidir con el usado en server.R
+          #  )
+          #  ),
+          # br(),
           
           
-          fluidRow(
-            box(
-              title = "Tabla de Origen con Porcentaje",
-              status = "primary",
-              solidHeader = TRUE,
-              collapsible = TRUE,
-              width = 12,  # Ajusta según necesidad
-              reactableOutput("tablaMuestraPorce") # Este ID debe coincidir con el usado en server.R
-            )
-          ),
-          br(),
+          # fluidRow(
+          #  box(
+          #    title = "Tabla de Origen con Porcentaje",
+          #    status = "primary",
+          #    solidHeader = TRUE,
+          #    collapsible = TRUE,
+          #    width = 12,  # Ajusta según necesidad
+          #    reactableOutput("tablaMuestraPorce") # Este ID debe coincidir con el usado en server.R
+          #  )
+          # ),
+          #    br(),
           
           
           #################################################
           #    Comparación de datos originales y muestra  #
           #################################################
           
-          fluidRow(
-            box(
-              title = "Gráfico Comparativo",
-              solidHeader = TRUE, 
-              status = "primary",
-              collapsible = TRUE,
-              width = 12, # Ajusta según sea necesario para el diseño de tu UI
-              highchartOutput("graficoComparativo")  # Cambia a highchartOutput para gráficos Highcharter
-            )
-          ),
-          br(),
-          
+          #        fluidRow(
+          #  box(
+          #    title = "Gráfico Comparativo",
+          #    solidHeader = TRUE, 
+          #    status = "primary",
+          #    collapsible = TRUE,
+          #    width = 12, # Ajusta según sea necesario para el diseño de tu UI
+          #    highchartOutput("graficoComparativo")  # Cambia a highchartOutput para gráficos Highcharter
+          #  )
+          #  ),
+          #  br(),
+          h3("Comparación porcentual entre datos originales y obtenidos por la muestra.",align = "left"),
           fluidRow(
             box(
               title = "Gráfico Comparativo entre original y muestra",
