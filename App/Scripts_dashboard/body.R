@@ -193,7 +193,9 @@ body <- dashboardBody(
             ),
             h4("Si posee datos aglomerados o consistentes en todo el rango de posibles valores, es mejor que opte por un ajuste Binomial. Caso contrario,
                datos que están muy alejados de la aglomeración y presentan uno o varios valores extremos, es mejor que opte por un ajuste de distribución
-               de poisson.", align = "left")
+               de poisson.", align = "left"),
+            # Botón para descargar el reporte
+            downloadButton("downloadReport1", "Descargar Reporte Análisis Descriptivo")
             
 
     ),

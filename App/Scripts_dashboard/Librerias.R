@@ -44,6 +44,9 @@ suppressMessages(library(fitdistrplus))
 suppressMessages(library(MASS))
 suppressMessages(library(ggplot2))
 suppressMessages(library(stats))
+suppressMessages(library(rmarkdown))
+suppressMessages(library(officer))
+suppressMessages(library(flextable))
 
 # Versiones de las librerías   -----> Ver la versión de "attached base packages:"  y "other attached packages:"
 

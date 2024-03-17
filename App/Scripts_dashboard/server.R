@@ -199,9 +199,82 @@ server <- function(input, output, session) {
         })
     })
 
-    # ... (cualquier otro código que necesites)
+    ###########################################
+    #     Reporte del análisis desciptivo     #
+    ###########################################
 
-
+    output$downloadReport1 <- downloadHandler(
+      filename = function() {
+        paste("Reporte_Analisis_Descriptivo_", Sys.Date(), ".docx", sep = "")
+      },
+      content = function(file) {
+        req(data1(), input$variable1)
+        
+        # Crea un nuevo documento Word
+        doc <- read_docx()
+        
+        # Añade el título y los metadatos al documento
+        doc <- doc %>% 
+          body_add_par("Análisis Descriptivo", style = "heading 1") %>%
+          body_add_par(paste("Archivo de datos:", input$file1$name), style = "heading 2") %>%
+          body_add_par(paste("Variable seleccionada:", input$variable1), style = "heading 2")
+        
+        # Calcula las estadísticas descriptivas
+        var_data <- data1()[[input$variable1]]
+        Stats <- tibble(
+          Medida = c("Conteo de Casos", "Valores Negativos", "Valores Faltantes", "Mínimo", 
+                     "Máximo", "Promedio", "Mediana", "Moda", "Desviación Estándar", 
+                     "Percentil 10", "Percentil 25", "Percentil 50", "Percentil 75", "Percentil 90"),
+          Valor = c(
+            sum(!is.na(var_data)),
+            sum(var_data < 0, na.rm = TRUE),
+            sum(is.na(var_data)),
+            min(var_data, na.rm = TRUE),
+            max(var_data, na.rm = TRUE),
+            mean(var_data, na.rm = TRUE),
+            median(var_data, na.rm = TRUE),
+            as.numeric(names(sort(table(var_data), decreasing = TRUE)[1])),
+            sd(var_data, na.rm = TRUE),
+            quantile(var_data, 0.1, na.rm = TRUE),
+            quantile(var_data, 0.25, na.rm = TRUE),
+            quantile(var_data, 0.50, na.rm = TRUE),
+            quantile(var_data, 0.75, na.rm = TRUE),
+            quantile(var_data, 0.90, na.rm = TRUE)
+          )
+        ) %>%
+          mutate(Valor = round(Valor, 1))
+        
+        # Crea una tabla flextable con las estadísticas
+        ft <- flextable(Stats)
+        
+        # Añade la tabla al documento
+        doc <- doc %>% 
+          body_add_flextable(ft)
+        
+        
+        # Genera el gráfico de densidad con ggplot2
+        plot <- ggplot(data1(), aes(x = .data[[input$variable1]])) +
+          geom_density(fill = 'skyblue', color = 'blue', alpha = 0.5) +
+          labs(title = paste("Distribución de", input$variable1))
+        
+        # Guarda el gráfico como una imagen temporal
+        plot_file <- tempfile(fileext = ".png")
+        ggsave(plot_file, plot, width = 5, height = 4, dpi = 300)
+        
+        # Añade la imagen al documento
+        doc <- doc %>% 
+          body_add_img(src = plot_file, width = 5, height = 4)
+        
+        # Guarda el documento
+        print(doc, target = file)
+        
+        # Elimina el archivo temporal de la imagen
+        unlink(plot_file)
+      }
+    )
+    
+    
+    
 
   
   #################################################################################
