@@ -389,7 +389,7 @@ body <- dashboardBody(
                        br(),
                        actionButton("show1_MUM", "Descargar archivo"),
             br(),
-            downloadButton("downloadReport2", "Descargar Reporte MUM")
+            downloadButton("downloadReport2", "Descargar Reporte Muestreo MUM")
   ),
   
   
@@ -611,7 +611,7 @@ body <- dashboardBody(
           br(),
           actionButton("show1_LES", "Descargar archivo"),
           br(),
-          downloadButton("downloadReport3", "Descargar Reporte LES"),
+          downloadButton("downloadReport3", "Descargar Reporte Muestreo LES"),
           
           
           

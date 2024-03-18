@@ -572,7 +572,42 @@ server <- function(input, output, session) {
     }
   })
   
-
+  ####################################
+  #       Descargar Reporte MUM      #
+  ####################################
+  
+  output$downloadReport2 <- downloadHandler(
+    filename = function() {
+      paste("Muestreo_MUM_", Sys.Date(), ".docx", sep = "")
+    },
+    content = function(file) {
+      req(data2(), input$variable2)
+      
+      # Crear un nuevo documento de Word
+      doc <- read_docx()
+      
+      # Añadir título principal
+      doc <- doc %>%
+        body_add_par("Muestreo por Unidades Monetarias", style = "heading 1")
+      
+      # Añadir subtítulo para parámetros
+      doc <- doc %>%
+        body_add_par("Parámetros", style = "heading 2")
+      
+      # Añadir los parámetros como texto, utilizando el estilo "Normal"
+      doc <- doc %>%
+        body_add_par(paste("Nombre del archivo de datos:", input$file2$name), style = "Normal") %>%
+        body_add_par(paste("Variable seleccionada:", input$variable2), style = "Normal") %>%
+        body_add_par(paste("Error Tolerable:", input$freq1_MUM), style = "Normal") %>%
+        body_add_par(paste("Error Esperado:", input$freq2_MUM), style = "Normal") %>%
+        body_add_par(paste("Nivel de confianza:", input$freq3_MUM), style = "Normal") %>%
+        body_add_par(paste("Selección de la distribución:", input$distri_1), style = "Normal")
+      
+      # Guardar el documento
+      print(doc, target = file)
+    }
+  )
+  
   #################################################################################
   #################################################################################
   #                          Muestreo a Juicio  LES                               #
