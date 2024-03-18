@@ -387,7 +387,9 @@ body <- dashboardBody(
                        
                        h3("Descargar la muestra seleccionada"),
                        br(),
-                       actionButton("show1_MUM", "Descargar archivo")
+                       actionButton("show1_MUM", "Descargar archivo"),
+            br(),
+            downloadButton("downloadReport2", "Descargar Reporte MUM")
   ),
   
   
@@ -607,7 +609,10 @@ body <- dashboardBody(
           
           h3("Descargar la muestra seleccionada"),
           br(),
-          actionButton("show1_LES", "Descargar archivo")
+          actionButton("show1_LES", "Descargar archivo"),
+          br(),
+          downloadButton("downloadReport3", "Descargar Reporte LES"),
+          
           
           
           ),
@@ -840,7 +845,9 @@ body <- dashboardBody(
           
           h3("Descargar la muestra seleccionada"),
           br(),
-          actionButton("show1_Atri", "Descargar archivo")
+          actionButton("show1_Atri", "Descargar archivo"),
+          br(),
+          downloadButton("downloadReport4", "Descargar Reporte Muestreo Atributos")
           
         
           
@@ -1025,7 +1032,9 @@ body <- dashboardBody(
            reactableOutput("Eval")
          )
        )
-     )
+     ),
+     br(),
+     downloadButton("downloadReport5", "Descargar Reporte Evaluación")
           
   )
   )
