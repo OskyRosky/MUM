@@ -576,37 +576,69 @@ server <- function(input, output, session) {
   #       Descargar Reporte MUM      #
   ####################################
   
-  output$downloadReport2 <- downloadHandler(
-    filename = function() {
-      paste("Muestreo_MUM_", Sys.Date(), ".docx", sep = "")
-    },
-    content = function(file) {
-      req(data2(), input$variable2)
+  # Definiciones globales
+  sample_size <- reactiveVal(NULL)  # Inicializa como un valor reactivo
+  reactive_seed <- reactiveVal(NULL)  # Inicializa como un valor reactivo
+  
+  # Observa el evento del botón para actualizar los valores de muestra y semilla
+  observeEvent(input$update_MUM, {
+    if (input$freq2_MUM < input$freq1_MUM) {
+      # Aquí se calcula el tamaño de la muestra y se actualiza sample_size
+      stage1 <- planning(materiality = input$freq1_MUM, expected = input$freq2_MUM, likelihood = input$distri_1, conf.level = input$freq3_MUM)
+      sample_size(data.frame(`Muestra` = stage1$n))
       
-      # Crear un nuevo documento de Word
-      doc <- read_docx()
-      
-      # Añadir título principal
-      doc <- doc %>%
-        body_add_par("Muestreo por Unidades Monetarias", style = "heading 1")
-      
-      # Añadir subtítulo para parámetros
-      doc <- doc %>%
-        body_add_par("Parámetros", style = "heading 2")
-      
-      # Añadir los parámetros como texto, utilizando el estilo "Normal"
-      doc <- doc %>%
-        body_add_par(paste("Nombre del archivo de datos:", input$file2$name), style = "Normal") %>%
-        body_add_par(paste("Variable seleccionada:", input$variable2), style = "Normal") %>%
-        body_add_par(paste("Error Tolerable:", input$freq1_MUM), style = "Normal") %>%
-        body_add_par(paste("Error Esperado:", input$freq2_MUM), style = "Normal") %>%
-        body_add_par(paste("Nivel de confianza:", input$freq3_MUM), style = "Normal") %>%
-        body_add_par(paste("Selección de la distribución:", input$distri_1), style = "Normal")
-      
-      # Guardar el documento
-      print(doc, target = file)
+      # Aquí se actualiza el valor de la semilla
+      seed_number <- sample(1:100000, 1)
+      reactive_seed(seed_number)
+    } else {
+      # Mostrar advertencia si los parámetros no son adecuados
+      showModal(modalDialog(
+        title = "Advertencia",
+        "Los parámetros especificados no son válidos. Por favor, revisa tus entradas.",
+        easyClose = TRUE,
+        footer = modalButton("Cerrar")
+      ))
     }
-  )
+  })
+  
+  
+  observeEvent(input$update_MUM, {
+    output$downloadReport2 <- downloadHandler(
+      filename = function() {
+        paste("Muestreo_MUM_", Sys.Date(), ".docx", sep = "")
+      },
+      content = function(file) {
+        req(data2(), input$variable2, sample_size(), reactive_seed())
+        
+        # Crear un nuevo documento de Word
+        doc <- read_docx()
+        
+        # Añadir título principal y otros detalles como antes...
+        doc <- doc %>%
+          body_add_par("Muestreo por Unidades Monetarias", style = "heading 1") %>%
+          body_add_par("Parámetros", style = "heading 2") %>%
+          body_add_par(paste("Nombre del archivo de datos:", input$file2$name), style = "Normal") %>%
+          body_add_par(paste("Variable seleccionada:", input$variable2), style = "Normal") %>%
+          body_add_par(paste("Error Tolerable:", input$freq1_MUM), style = "Normal") %>%
+          body_add_par(paste("Error Esperado:", input$freq2_MUM), style = "Normal") %>%
+          body_add_par(paste("Nivel de confianza:", input$freq3_MUM), style = "Normal") %>%
+          body_add_par(paste("Selección de la distribución:", input$distri_1), style = "Normal") %>%
+          body_add_par("Información de Muestreo", style = "heading 2")
+        
+        # Añadir "Tamaño de Muestra" y su valor en la misma línea
+        doc <- doc %>%
+          body_add_par(paste("Tamaño de Muestra:", as.character(sample_size()$Muestra)), style = "Normal")
+        
+        # Añadir "Semilla" y su valor en la siguiente línea
+        doc <- doc %>%
+          body_add_par(paste("Semilla para selección por PPT:", as.character(reactive_seed())), style = "Normal")
+        
+        # Guardar el documento
+        print(doc, target = file)
+      }
+    )
+  })
+
   
   #################################################################################
   #################################################################################
