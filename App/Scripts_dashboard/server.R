@@ -570,45 +570,36 @@ server <- function(input, output, session) {
       
       
     }
-  })
-  
-  ####################################
-  #       Descargar Reporte MUM      #
-  ####################################
-  
-  # Definiciones globales
-  sample_size <- reactiveVal(NULL)  # Inicializa como un valor reactivo
-  reactive_seed <- reactiveVal(NULL)  # Inicializa como un valor reactivo
-  
-  # Observa el evento del botón para actualizar los valores de muestra y semilla
-  observeEvent(input$update_MUM, {
-    if (input$freq2_MUM < input$freq1_MUM) {
-      # Aquí se calcula el tamaño de la muestra y se actualiza sample_size
-      stage1 <- planning(materiality = input$freq1_MUM, expected = input$freq2_MUM, likelihood = input$distri_1, conf.level = input$freq3_MUM)
-      sample_size(data.frame(`Muestra` = stage1$n))
+    
+    
+    # Ponerlo acá mejor la parte de reporte
+    
+    ################################################################################################
+    ####                                    Reporte  del MUM                                       #
+    ################################################################################################
+    
+    # Funcion de densidad 
+    
+    generarGraficoDensidad <- function(datosOriginales, datosMuestra, variable) {
+      p <- ggplot() +
+        geom_density(data = datosOriginales, aes_string(x = variable), fill = "blue", alpha = 0.5) +
+        geom_density(data = datosMuestra, aes_string(x = variable), fill = "lightgreen", alpha = 0.5) +
+        labs(title = "Comparación entre datos Original vs Muestra",
+             x = variable,
+             y = "Densidad") +
+        theme_minimal()
       
-      # Aquí se actualiza el valor de la semilla
-      seed_number <- sample(1:100000, 1)
-      reactive_seed(seed_number)
-    } else {
-      # Mostrar advertencia si los parámetros no son adecuados
-      showModal(modalDialog(
-        title = "Advertencia",
-        "Los parámetros especificados no son válidos. Por favor, revisa tus entradas.",
-        easyClose = TRUE,
-        footer = modalButton("Cerrar")
-      ))
+      return(p)
     }
-  })
-  
-  
-  observeEvent(input$update_MUM, {
+    
+    # Descarga del reporte MUM
+    
     output$downloadReport2 <- downloadHandler(
       filename = function() {
         paste("Muestreo_MUM_", Sys.Date(), ".docx", sep = "")
       },
       content = function(file) {
-        req(data2(), input$variable2, sample_size(), reactive_seed())
+        req(data2(), input$variable2, sample_size(), reactive_seed(), Muestra())
         
         # Crear un nuevo documento de Word
         doc <- read_docx()
@@ -627,17 +618,55 @@ server <- function(input, output, session) {
         
         # Añadir "Tamaño de Muestra" y su valor en la misma línea
         doc <- doc %>%
-          body_add_par(paste("Tamaño de Muestra:", as.character(sample_size()$Muestra)), style = "Normal")
-        
-        # Añadir "Semilla" y su valor en la siguiente línea
-        doc <- doc %>%
+          body_add_par(paste("Tamaño de Muestra:", as.character(sample_size()$Muestra)), style = "Normal")  %>%
           body_add_par(paste("Semilla para selección por PPT:", as.character(reactive_seed())), style = "Normal")
+        
+        
+        
+        # Generar y guardar el gráfico de densidad como imagen temporal
+        datosOriginales <- data2()  # Asegúrate de que estos son los datos completos
+        datosMuestra <- Muestra()  # Asegúrate de que estos son los datos de la muestra
+        variable <- input$variable2
+        
+        grafico <- generarGraficoDensidad(datosOriginales, datosMuestra, variable)
+        rutaImagen <- tempfile(fileext = ".png")
+        ggsave(rutaImagen, plot = grafico, width = 7, height = 5, dpi = 300)
+        
+        # Añadir el gráfico al documento
+        doc <- doc %>%
+          body_add_par("Gráfico comparativo entre valores originales y obtenidos por la muestra.", style = "heading 2") %>%
+          body_add_img(src = rutaImagen, width = 7, height = 5)
+        
+        
+        # Añadir la tabla
+        
+        # Añadir sección de "1.4 Muestra Seleccionada"
+        doc <- doc %>%
+          body_add_par("1.4 Muestra Seleccionada", style = "heading 2")
+        
+        # Asegúrate de que Muestra() devuelva un data frame
+        datosMuestra <- Muestra()
+        
+        # Convertir datos de la muestra en una tabla de Word
+        if (!is.null(datosMuestra)) {
+          doc <- doc %>%
+            body_add_table(datosMuestra, style = "table_template")  # Eliminado el argumento autofit
+        } else {
+          doc <- doc %>%
+            body_add_par("No hay datos de muestra disponibles.", style = "Normal")
+        }
         
         # Guardar el documento
         print(doc, target = file)
+        
+        # Limpiar eliminando la imagen temporal
+        unlink(rutaImagen)
       }
     )
+    
   })
+  
+  
 
   
   #################################################################################

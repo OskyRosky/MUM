@@ -195,6 +195,7 @@ body <- dashboardBody(
                datos que están muy alejados de la aglomeración y presentan uno o varios valores extremos, es mejor que opte por un ajuste de distribución
                de poisson.", align = "left"),
             # Botón para descargar el reporte
+            h3("Descargar Reporte", align = "left"),
             downloadButton("downloadReport1", "Descargar Reporte Análisis Descriptivo")
             
 
@@ -389,6 +390,7 @@ body <- dashboardBody(
                        br(),
                        actionButton("show1_MUM", "Descargar archivo"),
             br(),
+            h3("Descargar Reporte", align = "left"),
             downloadButton("downloadReport2", "Descargar Reporte Muestreo MUM")
   ),
   
@@ -611,6 +613,7 @@ body <- dashboardBody(
           br(),
           actionButton("show1_LES", "Descargar archivo"),
           br(),
+          h3("Descargar Reporte", align = "left"),
           downloadButton("downloadReport3", "Descargar Reporte Muestreo LES"),
           
           
@@ -847,6 +850,7 @@ body <- dashboardBody(
           br(),
           actionButton("show1_Atri", "Descargar archivo"),
           br(),
+          h3("Descargar Reporte", align = "left"),
           downloadButton("downloadReport4", "Descargar Reporte Muestreo Atributos")
           
         
@@ -1034,6 +1038,7 @@ body <- dashboardBody(
        )
      ),
      br(),
+     h3("Descargar Reporte", align = "left"),
      downloadButton("downloadReport5", "Descargar Reporte Evaluación")
           
   )
