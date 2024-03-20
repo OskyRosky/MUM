@@ -580,10 +580,10 @@ server <- function(input, output, session) {
     
     # Funcion de densidad 
     
-    generarGraficoDensidad <- function(datosOriginales, datosMuestra, variable) {
+    generarGraficoDensidadMUM <- function(datosOriginales, datosMuestra, variable) {
       p <- ggplot() +
-        geom_density(data = datosOriginales, aes_string(x = variable), fill = "blue", alpha = 0.5) +
-        geom_density(data = datosMuestra, aes_string(x = variable), fill = "lightgreen", alpha = 0.5) +
+        geom_density(data = datosOriginales, aes(x = variable), fill = "blue", alpha = 0.5) +
+        geom_density(data = datosMuestra, aes(x = variable), fill = "lightgreen", alpha = 0.5) +
         labs(title = "Comparación entre datos Original vs Muestra",
              x = variable,
              y = "Densidad") +
@@ -628,7 +628,7 @@ server <- function(input, output, session) {
         datosMuestra <- Muestra()  # Asegúrate de que estos son los datos de la muestra
         variable <- input$variable2
         
-        grafico <- generarGraficoDensidad(datosOriginales, datosMuestra, variable)
+        grafico <- generarGraficoDensidadMUM(datosOriginales, datosMuestra, variable)
         rutaImagen <- tempfile(fileext = ".png")
         ggsave(rutaImagen, plot = grafico, width = 7, height = 5, dpi = 300)
         
@@ -1007,6 +1007,92 @@ server <- function(input, output, session) {
   ###########################
   #    Reporte del MUM      #
   ###########################
+  
+  generarGraficoDensidadLES <- function(datosOriginales, datosMuestra, variable) {
+    p <- ggplot() +
+      geom_density(data = datosOriginales, aes(x = .data[[variable]]), fill = "blue", alpha = 0.5) +
+      geom_density(data = datosMuestra, aes(x = .data[[variable]]), fill = "lightgreen", alpha = 0.5) +
+      labs(title = "Comparación entre datos Original vs Muestra LES",
+           x = variable,
+           y = "Densidad") +
+      theme_minimal()
+    
+    return(p)
+  }
+  
+  
+  output$downloadReport3 <- downloadHandler(
+    filename = function() {
+      paste("Muestreo_LES_", Sys.Date(), ".docx", sep = "")
+    },
+    content = function(file) {
+      req(data3(), input$variable3, sample_size(), reactive_seed())
+      
+      # Iniciar un nuevo documento de Word
+      doc <- read_docx()
+      
+      # Añadir título general y subtítulo con los parámetros
+      doc <- doc %>%
+        body_add_par("Muestreo LES", style = "heading 1") %>%
+        body_add_par("Parámetros", style = "heading 2") %>%
+        body_add_par(paste("Nombre del archivo de datos:", input$file3$name), style = "Normal") %>%
+        body_add_par(paste("Variable seleccionada:", input$variable3), style = "Normal") %>%
+        body_add_par(paste("Error Tolerable:", input$freq1_LES), style = "Normal") %>%
+        body_add_par(paste("Error Esperado:", input$freq2_LES), style = "Normal") %>%
+        body_add_par(paste("Nivel de confianza:", input$freq3_LES), style = "Normal") %>%
+        body_add_par(paste("Selección de la distribución:", input$distri_2), style = "Normal")
+      
+      # Continuar añadiendo contenido al documento según sea necesario
+      
+      doc <- doc %>%
+      body_add_par("Información de Muestreo", style = "heading 2") %>%
+      body_add_par(paste("Tamaño de Muestra:", as.character(sample_size()$Muestra)), style = "Normal")  %>%
+      body_add_par(paste("Semilla para selección aleatoria inferior al LES:", as.character(reactive_seed())), style = "Normal")
+      
+      ###############################
+      #      Gráfico comparativo    #
+      ###############################
+      
+      # Generar y guardar el gráfico de densidad como imagen temporal
+      datosOriginales <- data3()  # Asegúrate de que estos son los datos completos
+      datosMuestra <- Muestra_2()  # Asegúrate de que estos son los datos de la muestra
+      variable <- input$variable3
+      
+      grafico <- generarGraficoDensidadLES(datosOriginales, datosMuestra, variable)
+      rutaImagen <- tempfile(fileext = ".png")
+      ggsave(rutaImagen, plot = grafico, width = 7, height = 5, dpi = 300)
+      
+      
+      doc <- doc %>%
+        body_add_par("Gráfico comparativo entre valores originales y obtenidos por la muestra.", style = "heading 2") %>%
+        body_add_img(src = rutaImagen, width = 7, height = 5)
+      
+      ######################################################
+      #    Generar la tabla con los datos de la muestre    #
+      ######################################################
+      
+      doc <- doc %>%
+        body_add_par("1.4 Muestra Seleccionada", style = "heading 2")
+      
+      # Asegúrate de que Muestra() devuelva un data frame
+      datosMuestra2 <- Muestra_2()
+      
+      # Convertir datos de la muestra en una tabla de Word
+      if (!is.null(datosMuestra2)) {
+        doc <- doc %>%
+          body_add_table(datosMuestra2, style = "table_template")  # Eliminado el argumento autofit
+      } else {
+        doc <- doc %>%
+          body_add_par("No hay datos de muestra disponibles.", style = "Normal")
+      }
+      
+      # Guardar el documento
+      print(doc, target = file)
+      
+      # Limpiar eliminando la imagen temporal
+      unlink(rutaImagen)
+    }
+  )
   
   
   
