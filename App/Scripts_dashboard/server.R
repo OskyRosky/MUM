@@ -1159,14 +1159,24 @@ server <- function(input, output, session) {
     
   })
   
-  #################################
-  #    Cálculo tamaño muestra     #
-  #################################
+
   
-  # Objeto reactivo para el tamaño de muestra
-  sample_size <- reactiveVal()  # Inicializa como un valor reactivo
+ 
   
   observeEvent(input$update_Atri, {  # Cuando 'update' se presiona, se ejecuta el código dentro de observeEvent
+    
+    
+    #################################
+    #    Cálculo tamaño muestra     #
+    #################################
+    
+    
+    # Objeto reactivo para el tamaño de muestra
+    sample_size <- reactiveVal()  # Inicializa como un valor reactivo
+    
+    
+    
+    
     stage1 <- planning(materiality = input$freq1_Atri, 
                        expected = input$freq2_Atri,
                        likelihood = input$distri_3, 
@@ -1174,233 +1184,291 @@ server <- function(input, output, session) {
     )
     
     sample_size(data.frame(`Muestra` = stage1$n))  # Asigna el valor al reactivo
-  })
-  
-  # Renderizar la tabla de tamaño de muestra
-  output$SampleSize_Atri <- renderReactable({
-    req(sample_size())  # Asegúrate de que el valor reactivo no sea NULL
-    reactable(sample_size())  # Renderiza el valor reactivo en una tabla
-  })
-  
-
-  
-  ########################################
-  #    Selección unidades por Atributos  #
-  ########################################
-  
-  #################################
-  #    Valor de la semilla Atri   #
-  #################################
-  
-  set.seed(Sys.time())
-  
-  # Función reactiva para generar y almacenar la semilla
-  reactive_seed <- reactiveVal()  # Inicializa como un valor reactivo
-  
-  observeEvent(input$update_Atri, {  # Actualiza la semilla cuando se presiona 'update'
-    seed_number <- sample(1:100000, 1)  # Genera un número aleatorio entre 1 y 100000
-    reactive_seed(seed_number)  # Asigna el número a reactive_seed
-  })
-  
-  
-  # Crear una tabla reactiva para mostrar la semilla
-  output$seedvalue_Atri <- renderReactable({
-    req(reactive_seed())  # Asegúrate de que la semilla no sea NULL
-    reactable(data.frame(`Semilla` = reactive_seed()))  # Muestra la semilla en una tabla
-  })
-  
-  #################################
-  #   Selección de las unidades   #
-  #################################
-  
-  MuestraAtri <- eventReactive(input$update_Atri, {
-    # Asegura que los datos estén disponibles y que el tamaño de muestra sea válido
-    req(data4(), sample_size())
     
-    tamaño_muestra <- as.integer(sample_size())
-    if(is.na(tamaño_muestra) || tamaño_muestra <= 0) {
-      stop("El tamaño de la muestra no es válido")
-    }
     
-    set.seed(reactive_seed())
-    
-    data4() %>% sample_n(size = tamaño_muestra)
-  })
-  
-  observeEvent(input$update_Atri, {
-    # Asegura que los datos estén disponibles
-    req(data4())
-    
-    output$tablaMuestraAtri <- renderReactable({
-      reactable(MuestraAtri())
+    # Renderizar la tabla de tamaño de muestra
+    output$SampleSize_Atri <- renderReactable({
+      req(sample_size())  # Asegúrate de que el valor reactivo no sea NULL
+      reactable(sample_size())  # Renderiza el valor reactivo en una tabla
     })
     
-  })
- 
-  ########################################
-  #         Tabla por porcentajes        #
-  ########################################
-  
-  # Tabla Original
-  
-  tablaOrigenPorce <- reactive({
-    req(data4(), input$variable4) # Asegura que los datos y la variable seleccionada estén disponibles
     
-    datos <- data4() %>%
-      group_by(Categoria = .data[[input$variable4]]) %>%
-      tally(name = "Total") %>% # Utiliza tally() para contar las observaciones
-      mutate(Porcentaje = (Total / sum(Total)) * 100) %>%
-      ungroup() # Retira el agrupamiento
     
-    return(datos)
-  })
-  
-  # Tabla de la muestra
-  
-  tablaMuestraPorce <- reactive({
-    req(MuestraAtri(), input$variable4) # Asegúrate de que la muestra y la variable están disponibles
+    ########################################
+    #    Selección unidades por Atributos  #
+    ########################################
     
-    datosMuestra <- MuestraAtri() %>%
-      group_by(Categoria = .data[[input$variable4]]) %>%
-      tally(name = "Total") %>%
-      mutate(Porcentaje = round((Total / sum(Total)) * 100, digits = 1)) %>%
-      ungroup() # No se necesita renombrar aquí, ya se ha asignado el nombre 'Categoria'
+    #################################
+    #    Valor de la semilla Atri   #
+    #################################
     
-    return(datosMuestra)
-  })
-  
-  
-  # Para visualizar la tabla origianl 
-  #  observeEvent(input$update_Atri, {
-  #  output$tablaOrigenPorceOut <- renderReactable({
-  #    req(tablaOrigenPorce()) 
-  #    reactable(tablaOrigenPorce())
-  #  })
-  # })
-  
-  # Para visualizar la tabla muestra en la UI
-  
-  #  observeEvent(input$update_Atri, {
-  #  output$tablaMuestraPorce <- renderReactable({
-  #    req(tablaMuestraPorce()) 
-  #    reactable(tablaMuestraPorce())
-  #  })
-  #  })
-  
-
-  ###########################################################
-  #   Gráfico de Comparación de datos originales y muestra  #
-  ###########################################################
-  
-  #  observeEvent(input$update_Atri, {
-  #  output$graficoComparativo <- renderHighchart({
-  #    req(tablaOrigenPorce()) 
-      
-  #   datos <- tablaOrigenPorce()
-      
-      # Asegúrate de que los datos tienen las columnas 'Categoria' y 'Porcentaje'
-  #   if("Categoria" %in% names(datos) && "Porcentaje" %in% names(datos)) {
-  #      highchart() %>%
-  #        hc_chart(type = "bar") %>%
-  #        hc_title(text = "Distribución de Porcentajes por Categoría") %>%
-  #        hc_xAxis(categories = datos$Categoria) %>%
-  #        hc_yAxis(title = list(text = "Porcentaje"), labels = list(format = "{value}%")) %>%
-  #        hc_add_series(name = "Porcentaje", data = datos$Porcentaje) %>%
-  #       hc_plotOptions(column = list(dataLabels = list(enabled = TRUE, format = '{y}%')))
-  #    } else {
-  #      stop("Las columnas 'Categoria' y 'Porcentaje' no están presentes en los datos.")
-  #    }
-  #  })
-  #  })
-  
-  # Ambos
-  
-  
-  observeEvent(input$update_Atri, {
-    output$graficoComparativo2 <- renderHighchart({
-      # Requerimos que ambas tablas estén disponibles
-      req(tablaOrigenPorce(), tablaMuestraPorce())
-      
-      # Obtenemos los datos de las tablas reactivas
-      datosOrigen <- tablaOrigenPorce()
-      datosMuestra <- tablaMuestraPorce()
-      
-      # Unimos los datos por la columna 'Categoria'
-      datosCombinados <- merge(datosOrigen, datosMuestra, by = "Categoria", all = TRUE)
-      
-      # Creamos el gráfico con Highcharter
-      highchart() %>%
-        hc_chart(type = "bar") %>%
-        hc_title(text = "Comparación de Porcentajes por Categoría") %>%
-        hc_xAxis(categories = datosCombinados$Categoria) %>%
-        hc_yAxis(title = list(text = "Porcentaje")) %>%
-        hc_add_series(name = "Porcentaje Original", data = datosCombinados$Porcentaje.x) %>%
-        hc_add_series(name = "Porcentaje Muestra", data = datosCombinados$Porcentaje.y) %>%
-        hc_plotOptions(series = list(dataLabels = list(enabled = TRUE, format = '{y}%'))) %>%
-        hc_tooltip(shared = TRUE, pointFormat = '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}%</b><br/>') %>%
-        hc_legend(enabled = TRUE)
+    set.seed(Sys.time())
+    
+    # Función reactiva para generar y almacenar la semilla
+    reactive_seed <- reactiveVal()  # Inicializa como un valor reactivo
+    
+    observeEvent(input$update_Atri, {  # Actualiza la semilla cuando se presiona 'update'
+      seed_number <- sample(1:100000, 1)  # Genera un número aleatorio entre 1 y 100000
+      reactive_seed(seed_number)  # Asigna el número a reactive_seed
     })
-  })
-  
-  #################################################
-  #     Descargar datos del muestreo por Atri      #
-  #################################################
-  
-  observeEvent(input$show1_Atri, {
     
-    showModal(modalDialog(
-      title = "Descargar los datos ", br(),
-      br(),
-      downloadButton("download5.1",".csv file"),
-      br(),
-      br(),
-      downloadButton("download5.2",".txt file"),
-      br(),
-      br(),
-      downloadButton("download5.3",".xlsx file"),
+    
+    # Crear una tabla reactiva para mostrar la semilla
+    output$seedvalue_Atri <- renderReactable({
+      req(reactive_seed())  # Asegúrate de que la semilla no sea NULL
+      reactable(data.frame(`Semilla` = reactive_seed()))  # Muestra la semilla en una tabla
+    })
+    
+    #################################
+    #   Selección de las unidades   #
+    #################################
+    
+    MuestraAtri <- eventReactive(input$update_Atri, {
+      # Asegura que los datos estén disponibles y que el tamaño de muestra sea válido
+      req(data4(), sample_size())
       
-      footer = modalButton("Close"),
-      easyClose = TRUE)
+      tamaño_muestra <- as.integer(sample_size())
+      if(is.na(tamaño_muestra) || tamaño_muestra <= 0) {
+        stop("El tamaño de la muestra no es válido")
+      }
+      
+      set.seed(reactive_seed())
+      
+      data4() %>% sample_n(size = tamaño_muestra)
+    })
+    
+    observeEvent(input$update_Atri, {
+      # Asegura que los datos estén disponibles
+      req(data4())
+      
+      output$tablaMuestraAtri <- renderReactable({
+        reactable(MuestraAtri())
+      })
+      
+    })
+    
+    ########################################
+    #         Tabla por porcentajes        #
+    ########################################
+    
+    # Tabla Original
+    
+    tablaOrigenPorce <- reactive({
+      req(data4(), input$variable4) # Asegura que los datos y la variable seleccionada estén disponibles
+      
+      datos <- data4() %>%
+        group_by(Categoria = .data[[input$variable4]]) %>%
+        tally(name = "Total") %>% # Utiliza tally() para contar las observaciones
+        mutate(Porcentaje = (Total / sum(Total)) * 100) %>%
+        ungroup() # Retira el agrupamiento
+      
+      return(datos)
+    })
+    
+    # Tabla de la muestra
+    
+    tablaMuestraPorce <- reactive({
+      req(MuestraAtri(), input$variable4) # Asegúrate de que la muestra y la variable están disponibles
+      
+      datosMuestra <- MuestraAtri() %>%
+        group_by(Categoria = .data[[input$variable4]]) %>%
+        tally(name = "Total") %>%
+        mutate(Porcentaje = round((Total / sum(Total)) * 100, digits = 1)) %>%
+        ungroup() # No se necesita renombrar aquí, ya se ha asignado el nombre 'Categoria'
+      
+      return(datosMuestra)
+    })
+    
+
+  #############################
+  #  Gráfico comparativo      #
+  #############################
+    
+    
+      output$graficoComparativo2 <- renderHighchart({
+        # Requerimos que ambas tablas estén disponibles
+        req(tablaOrigenPorce(), tablaMuestraPorce())
+        
+        # Obtenemos los datos de las tablas reactivas
+        datosOrigen <- tablaOrigenPorce()
+        datosMuestra <- tablaMuestraPorce()
+        
+        # Unimos los datos por la columna 'Categoria'
+        datosCombinados <- merge(datosOrigen, datosMuestra, by = "Categoria", all = TRUE)
+        
+        # Creamos el gráfico con Highcharter
+        highchart() %>%
+          hc_chart(type = "bar") %>%
+          hc_title(text = "Comparación de Porcentajes por Categoría") %>%
+          hc_xAxis(categories = datosCombinados$Categoria) %>%
+          hc_yAxis(title = list(text = "Porcentaje")) %>%
+          hc_add_series(name = "Original", data = datosCombinados$Porcentaje.x) %>%
+          hc_add_series(name = "Muestra", data = datosCombinados$Porcentaje.y) %>%
+          hc_plotOptions(series = list(dataLabels = list(enabled = TRUE, format = '{y}%'))) %>%
+          hc_tooltip(shared = TRUE, pointFormat = '<span style="color:{series.color}">{series.name}</span>: <b>{point.y}%</b><br/>') %>%
+          hc_legend(enabled = TRUE) %>%
+          hc_exporting(enabled = TRUE)
+      })
+
+    
+    #################################################
+    #     Descargar datos del muestreo por Atri      #
+    #################################################
+    
+    observeEvent(input$show1_Atri, {
+      
+      showModal(modalDialog(
+        title = "Descargar los datos ", br(),
+        br(),
+        downloadButton("download5.1",".csv file"),
+        br(),
+        br(),
+        downloadButton("download5.2",".txt file"),
+        br(),
+        br(),
+        downloadButton("download5.3",".xlsx file"),
+        
+        footer = modalButton("Close"),
+        easyClose = TRUE)
+      )
+      
+    })
+    
+    output$download5.1 <- downloadHandler(
+      
+      
+      filename = function() {
+        paste("MuestraAtributo-", Sys.Date(), ".csv", sep="")
+      },
+      
+      content = function(file) {
+        write.csv(MuestraAtri(), file)
+      }
     )
     
+    output$download5.2 <- downloadHandler(
+      
+      filename = function() {
+        paste("MuestraAtributo-", Sys.Date(), ".txt", sep="")
+      },
+      content = function(file) {
+        write.table(MuestraAtri(), file)
+      }
+    )
+    
+    output$download5.3 <- downloadHandler(
+      filename = function() {
+        paste("MuestraAtributo-", Sys.Date(), ".xlsx", sep="")
+      },
+      content = function(file) {
+        # Suponiendo que Muestra() es una función que retorna el dataframe que quieres descargar
+        write.xlsx(MuestraAtri(), file)
+      }
+    )
+    
+    #################################################
+    #     Reporte del Muestreo por Atributos       #
+    #################################################
+
+    generarGraficoPorcentajesAtri <- function(datosOriginales, datosMuestra) {
+      ggplot() +
+        geom_bar(data = datosOriginales, aes(x = Categoria, y = Porcentaje, fill = "Original"), 
+                 stat = "identity", position = position_dodge(width = 0.8), width = 0.35) +
+        geom_bar(data = datosMuestra, aes(x = Categoria, y = Porcentaje, fill = "Muestra"), 
+                 stat = "identity", position = position_dodge(width = 0.8), width = 0.35) +
+        scale_fill_manual(values = c("Original" = "lightblue", "Muestra" = "lightgreen")) +
+        labs(title = "Comparación de Porcentajes por Categoría", x = "Categoría", y = "Porcentaje") +
+        theme_minimal() +
+        coord_flip() + # Para hacer las barras horizontales
+        theme(legend.position = "bottom") # Para mover la leyenda al fondo
+    }
+    
+    
+    
+    output$downloadReport4 <- downloadHandler(
+      filename = function() {
+        paste("Muestreo_Atributos_", Sys.Date(), ".docx", sep = "")
+      },
+      content = function(file) {
+        req(data4(), input$variable4, sample_size(), reactive_seed(), MuestraAtri())
+        
+        # Iniciar un nuevo documento de Word
+        doc <- read_docx()
+        
+        # Añadir título general y subtítulo con los parámetros
+        doc <- doc %>%
+          body_add_par("Muestreo Atributos", style = "heading 1") %>%
+          body_add_par("Parámetros", style = "heading 2") %>%
+          body_add_par(paste("Nombre del archivo de datos:", input$file4$name), style = "Normal") %>%
+          body_add_par(paste("Variable seleccionada:", input$variable4), style = "Normal") %>%
+          body_add_par(paste("Error Tolerable:", input$freq1_Atri), style = "Normal") %>%
+          body_add_par(paste("Error Esperado:", input$freq2_Atri), style = "Normal") %>%
+          body_add_par(paste("Nivel de confianza:", input$freq3_Atri), style = "Normal") %>%
+          body_add_par(paste("Selección de la distribución:", input$distri_3), style = "Normal")
+        
+        # Continuar añadiendo contenido al documento según sea necesario
+        
+        
+        
+        doc <- doc %>%
+          body_add_par("Información de Muestreo", style = "heading 2") %>%
+          body_add_par(paste("Tamaño de Muestra:", as.character(sample_size()$Muestra)), style = "Normal")  %>%
+          body_add_par(paste("Semilla para selección aleatoria:", as.character(reactive_seed())), style = "Normal")
+        
+        ###############################
+        #      Gráfico comparativo    #
+        ###############################
+        
+        # Generar gráfico comparativo
+        datosOrigen <- tablaOrigenPorce()
+        datosMuestra <- tablaMuestraPorce()
+        grafico <- generarGraficoPorcentajesAtri(datosOrigen, datosMuestra)
+        rutaImagen <- tempfile(fileext = ".png")
+        ggsave(rutaImagen, plot = grafico, width = 8, height = 6, dpi = 300)
+
+        
+        doc <- doc %>%
+          body_add_par("Gráfico comparativo entre valores originales y obtenidos por la muestra.", style = "heading 2") %>%
+          body_add_img(src = rutaImagen, width = 8, height = 6)
+        
+        ######################################################
+        #    Generar la tabla con los datos de la muestre    #
+        ######################################################
+        
+        doc <- doc %>%
+          body_add_par("Muestra Seleccionada", style = "heading 2")
+        
+        datosMuestra <- MuestraAtri()  # Asegúrate de que estos son los datos de la muestra
+        
+        
+        # Convertir los datos de la muestra en una tabla de Word
+        if (!is.null(datosMuestra) && nrow(datosMuestra) > 0) {
+          doc <- doc %>%
+            body_add_table(value = datosMuestra, style = "table_template")
+        } else {
+          doc <- doc %>%
+            body_add_par("No hay datos de muestra disponibles.", style = "Normal")
+        }
+        
+        
+        # Guardar el documento
+        print(doc, target = file)
+        
+        # Limpiar eliminando la imagen temporal
+        unlink(rutaImagen)
+        
+
+      }
+    )
+    
+    
+    
   })
   
-  output$download5.1 <- downloadHandler(
-    
-    
-    filename = function() {
-      paste("MuestraAtributo-", Sys.Date(), ".csv", sep="")
-    },
-    
-    content = function(file) {
-      write.csv(MuestraAtri(), file)
-    }
-  )
-  
-  output$download5.2 <- downloadHandler(
-    
-    filename = function() {
-      paste("MuestraAtributo-", Sys.Date(), ".txt", sep="")
-    },
-    content = function(file) {
-      write.table(MuestraAtri(), file)
-    }
-  )
-  
-  output$download5.3 <- downloadHandler(
-    filename = function() {
-      paste("MuestraAtributo-", Sys.Date(), ".xlsx", sep="")
-    },
-    content = function(file) {
-      # Suponiendo que Muestra() es una función que retorna el dataframe que quieres descargar
-      write.xlsx(MuestraAtri(), file)
-    }
-  )
   
   
-  ##############################
-  #    Reporte del Atributo    #
-  ##############################
+  
+
   
   
   ###########################################################################################################
