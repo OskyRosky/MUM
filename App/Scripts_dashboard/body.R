@@ -93,7 +93,10 @@ body <- dashboardBody(
               tags$li(h4("Se presentan indicadores de riego según la comparación entre los valores observados y auditados.", align = "left")),
               tags$li(h4("Se expone la selección de criterios o umbrales máximos tolerables en la evaluación de la muestra.", align = "left"))
             ),
-            
+            h2("Reportes de análisis", align = "left", style = "font-weight: bold; text-decoration: underline;"),
+            br(),
+            h4("Al final de cada sección se presenta un 'Descargar Reporte', lo cual permite obtener obtener los resultados del análisis es un formato más adecuado.",align = "left"),
+            h4("Cada una de las secciones de análisis puede ser descargada en formato .docx.",align = "left"),
             br(),
             h2("Sobre la carga de datos", align = "left", style = "font-weight: bold; text-decoration: underline;"),
             br(),
@@ -128,7 +131,8 @@ body <- dashboardBody(
               style = "list-style-type: disc; padding-left: 20px;",  # Estilo para la lista: disc es una viñeta redonda
               tags$li(h4("Conocer las principales estadísticas descriptivas de la variable seleccionada.", align = "left")),
               tags$li(h4("Visualizar la distribución de la variable seleccionada (densidad).", align = "left",)),
-              tags$li(h4("Comprar la distribución de la variable seleccionada con respecto a una distribución de poisson o binomial.", align = "left"))
+              tags$li(h4("Comprar la distribución de la variable seleccionada con respecto a una distribución de poisson o binomial.", align = "left")),
+              tags$li(h4("Descargar los resultados generados en formato '.docx'.", align = "left"))
             ),
             br(),
             h4("Este último punto lo guiará en el proceso de la siguiente sección, en donde deberá seleccionar la distribución que aproximada más al conjunto de datos em la determinación del tamaño de muestra"),
@@ -225,7 +229,8 @@ body <- dashboardBody(
               tags$li(h4("Calcular el tamaño de muestra.", align = "left")),
               tags$li(h4("Visualizar las unidades seleccionadas", align = "left",)),
               tags$li(h4("Comparar los datos cargados vs los datos obtenidos por la muestra.", align = "left")),
-              tags$li(h4("Descargar los datos de la muestra en formato, ya sea .csv, .txt y .xlsx", align = "left"))
+              tags$li(h4("Descargar los datos de la muestra en formato, ya sea .csv, .txt y .xlsx", align = "left")),
+              tags$li(h4("Descargar los resultados generados en formato '.docx'.", align = "left"))
             ),
             br(), 
             
@@ -418,7 +423,8 @@ body <- dashboardBody(
               tags$li(h4("Calcular el tamaño de muestra.", align = "left")),
               tags$li(h4("Visualizar las unidades seleccionadas", align = "left",)),
               tags$li(h4("Comparar los datos cargados vs los datos obtenidos por la muestra.", align = "left")),
-              tags$li(h4("Descargar los datos de la muestra en formato, ya sea .csv, .txt y .xlsx", align = "left"))
+              tags$li(h4("Descargar los datos de la muestra en formato, ya sea .csv, .txt y .xlsx", align = "left")),
+              tags$li(h4("Descargar los resultados generados en formato '.docx'.", align = "left"))
             ),
             br(), 
             
@@ -641,6 +647,7 @@ body <- dashboardBody(
             tags$li(h4("Visualizar la muestra seleccionada.", align = "left")),
             tags$li(h4("Comparar los porcentajes de las categorías para los datos originales y los seleccionados por la muestra.", align = "left")),
             tags$li(h4("Descagar la muestra seleccionada.", align = "left")),
+            tags$li(h4("Descargar los resultados generados en formato '.docx'.", align = "left"))
             ),
           br(),
           h3("Cargar datos", align = "left"),
@@ -877,7 +884,8 @@ body <- dashboardBody(
             tags$li(h4("Comparar la información de los datos observados vs los datos auditados.", align = "left")),
             tags$li(h4("De forma descriptiva, valorar las diferencias.", align = "left")),
             tags$li(h4("Analizar ciertos Indicadores de Riesgo en el proceso de comparación entre la información de los datos observados vs los datos auditados.", align = "left",)),
-            tags$li(h4("Evaluar criterios empíricos en la determinación del umbral máximo permitido o tolerable.", align = "left"))
+            tags$li(h4("Evaluar criterios empíricos en la determinación del umbral máximo permitido o tolerable.", align = "left")),
+            tags$li(h4("Descargar los resultados generados en formato '.docx'.", align = "left"))
           ),
           br(), 
           

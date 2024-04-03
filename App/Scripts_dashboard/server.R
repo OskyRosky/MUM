@@ -1466,11 +1466,6 @@ server <- function(input, output, session) {
   })
   
   
-  
-  
-
-  
-  
   ###########################################################################################################
   ###########################################################################################################
   #                                               Evaluación                                                #
@@ -1520,11 +1515,24 @@ server <- function(input, output, session) {
       )
   })
   
+  Diferencias <- reactive({
+    datos <- DatosEval()  # Asume que esta función devuelve tus datos
+    diferencias <- datos %>%
+      mutate(Diferencia = abs(Observado - Auditado)) %>%
+      filter(Diferencia != 0) %>%
+      arrange(desc(Diferencia))
+    diferencias  # Devuelve el dataframe resultante
+  })
+  
   
   ###### Aplicar el boton activar 
   
+  ##################################################
+  # Acá el ObserveEvent
+  ###################################################
   
-
+  
+  
   observeEvent(input$analizar, {
   
     
@@ -1553,15 +1561,7 @@ server <- function(input, output, session) {
     
     # Evaluación únicamente de las diferencias
     
-    Diferencias <- reactive({
-      datos <- DatosEval()  # Asume que esta función devuelve tus datos
-      diferencias <- datos %>%
-        mutate(Diferencia = abs(Observado - Auditado)) %>%
-        filter(Diferencia != 0) %>%
-        arrange(desc(Diferencia))
-      diferencias  # Devuelve el dataframe resultante
-    })
-    
+
     
     output$Tabla3 <- renderReactable({
       
@@ -1729,74 +1729,216 @@ server <- function(input, output, session) {
     }
     
     
+    ##################################################
+    ###########Tabla final de evaluación   ###########
+    ##################################################
     
-  })
-  
-  ##################################################
-  ###########Tabla final de evaluación   ###########
-  ##################################################
-  
-  # Define la función para calcular los umbrales de decisión fuera del observeEvent
-  calculaUmbralDecision <- function(datos) {
-    fraccion_monto_auditado <- input$monto_maximo
-    porcentaje_diferencia_umbral <- input$porcentaje_umbral
-    conteos_diferencias_umbral <- input$conteo_umbral
-    casos_fuera_limites_umbral <- input$casos_umbral
+    # Define la función para calcular los umbrales de decisión fuera del observeEvent
+    calculaIndicadoresDecision <- function(datos, monto_maximo, porcentaje_umbral, conteo_umbral, casos_umbral) {
+     
+      if (is.null(datos$Observado) || is.null(datos$Auditado)) {
+        stop("Los datos de 'Observado' o 'Auditado' están vacíos o son NULL.")
+      }
+      
+      monto_diferencia_total <- sum(abs(datos$Observado - datos$Auditado), na.rm = TRUE)
+      if (length(monto_diferencia_total) != 1) {
+        stop("El cálculo de 'monto_diferencia_total' no devolvió un único valor.")
+      }
+      
+       monto_diferencia_total <- round(sum(abs(datos$Observado - datos$Auditado)), 1)
+      porcentaje_diferencia <- round((monto_diferencia_total / sum(datos$Auditado)) * 100, 1)
+      conteo_diferencias <- sum(datos$Observado != datos$Auditado)
+      
+      std_dev <- sd(datos$Observado - datos$Auditado, na.rm = TRUE)
+      limite_inferior <- -1.96 * std_dev
+      limite_superior <- 1.96 * std_dev
+      casos_fuera_limites <- sum(datos$Observado - datos$Auditado < limite_inferior | datos$Observado - datos$Auditado > limite_superior)
+      
+      valores <- c(monto_diferencia_total, porcentaje_diferencia, conteo_diferencias, casos_fuera_limites)
+      umbrales <- c(monto_maximo, porcentaje_umbral, conteo_umbral, casos_umbral)
+      decisiones <- ifelse(valores <= umbrales, "Aceptable", "No Aceptable")
+      
+      data.frame(
+        Indicador = c("Monto Diferencia Total", "Porcentaje de Diferencia", "Conteo Diferencias", "Casos Fuera de Límites"),
+        Valor = c(monto_diferencia_total, porcentaje_diferencia, conteo_diferencias, casos_fuera_limites),
+        Umbral = c(monto_maximo, porcentaje_umbral, conteo_umbral, casos_umbral),
+        Decision = decisiones
+      )
+    }
     
-    c(fraccion_monto_auditado, porcentaje_diferencia_umbral, 
-      conteos_diferencias_umbral, casos_fuera_limites_umbral)
-  }
-  
-  # Define la función para calcular los indicadores de decisión y decisiones fuera del observeEvent
-  calculaIndicadoresDecision <- function(datos) {
-    umbrales <- calculaUmbralDecision(datos)
     
-    monto_diferencia_total <- round(sum(abs(datos$Observado - datos$Auditado)),1)
-    porcentaje_diferencia <- round((monto_diferencia_total / sum(datos$Auditado)) * 100,1)
-    conteo_diferencias <- sum(datos$Observado != datos$Auditado)
+    # En tu server.R, define la variable reactiva en la parte superior
+    tablaDecisionReactiva <- reactiveVal()
     
-    std_dev <- sd(datos$Observado - datos$Auditado, na.rm = TRUE)
-    limite_inferior <- -1.96 * std_dev
-    limite_superior <- 1.96 * std_dev
-    casos_fuera_limites <- sum(datos$Observado - datos$Auditado < limite_inferior | 
-                                 datos$Observado - datos$Auditado > limite_superior)
     
-    valores <- c(monto_diferencia_total, porcentaje_diferencia, 
-                 conteo_diferencias, casos_fuera_limites)
+    # Observa cuando se presiona el botón de "Evaluación"
+    observeEvent(input$auditEval, {
+      req(data5())  # Asegúrate de que los datos necesarios están cargados
+      
+      # Asegúrate de que los umbrales son números válidos
+      monto_maximo <- as.numeric(input$monto_maximo)
+      porcentaje_umbral <- as.numeric(input$porcentaje_umbral)
+      conteo_umbral <- as.numeric(input$conteo_umbral)
+      casos_umbral <- as.numeric(input$casos_umbral)
+      
+      # Calcula la tabla de decisión usando la función definida
+      tabla_decision <- calculaIndicadoresDecision(
+        DatosEval(),
+        monto_maximo,
+        porcentaje_umbral,
+        conteo_umbral,
+        casos_umbral
+      )
+      
+      # Almacena la tabla de decisión en la variable reactiva
+      tablaDecisionReactiva(tabla_decision)
+      
+      # Forzar actualización de la tabla en la UI
+      output$Eval <- renderReactable({
+        reactable(tabla_decision)
+      })
+    })
     
-    decisiones <- ifelse(valores < umbrales, "Aceptable", "No es aceptable")
+    ####################################################################
+    #                     Reporte de la evaluación                     #
+    ####################################################################
     
-    data.frame(
-      Indicador = c("Monto Diferencia Total", "Porcentaje de Diferencia", 
-                    "Conteo Diferencias", "Casos Fuera de Límites"),
-      Valor = valores,
-      Criterio = umbrales,
-      Decision = decisiones
+    
+    EvalScatterPlot <- function(datos) {
+      p <- ggplot(datos, aes(x = Observado, y = Auditado)) +
+        geom_point(color = "blue") +
+        geom_smooth(method = "lm", color = "red") +
+        labs(title = "Gráfico de dispersión entre los valores Observados vs Auditados.",
+             x = "Observado",
+             y = "Auditado") +
+        theme_minimal()
+      return(p)
+    }
+    
+    ScatterPlotLim <- function(datos) {
+      # Asegurarse de que 'datos' es un data frame y contiene las columnas 'Observado' y 'Auditado'
+      if (!("Observado" %in% names(datos) && "Auditado" %in% names(datos))) {
+        stop("Los datos deben contener las columnas 'Observado' y 'Auditado'.")
+      }
+      
+      # Calcular los límites de confianza
+      diferencia <- datos$Observado - datos$Auditado
+      std_dev <- sd(diferencia, na.rm = TRUE)
+      mean_diff <- mean(diferencia, na.rm = TRUE)
+      
+      # Coeficientes de la línea y = x
+      intercept <- 0
+      slope <- 1
+      
+      # Calcular interceptos para las líneas de límite
+      intercept_inf <- intercept + (mean_diff - 1.96 * std_dev)
+      intercept_sup <- intercept + (mean_diff + 1.96 * std_dev)
+      
+      # Crear el gráfico
+      p <- ggplot(datos, aes(x = Observado, y = Auditado)) +
+        geom_point(color = "blue") +
+        geom_abline(intercept = intercept, slope = slope, linetype = "dashed", color = "red") +
+        geom_abline(intercept = intercept_inf, slope = slope, linetype = "dashed", color = "darkgreen") +
+        geom_abline(intercept = intercept_sup, slope = slope, linetype = "dashed", color = "darkgreen") +
+        labs(title = "Scatter Plot con Límites de Confianza",
+             x = "Observado",
+             y = "Auditado") +
+        theme_minimal()
+      
+      return(p)
+    }
+    
+    output$downloadReport5 <- downloadHandler(
+      filename = function() {
+        paste("Evaluacion_Auditoria_", Sys.Date(), ".docx", sep = "")
+      },
+      content = function(file) {
+        req(data5(), input$select_var1, input$select_var2, DatosEval(), Diferencias(), tablaDecisionReactiva())
+        
+        # Iniciar un nuevo documento de Word
+        doc <- read_docx()
+        
+        # Añadir título y subtítulos
+        doc <- doc %>%
+          body_add_par("Evaluación", style = "heading 1") %>%
+          body_add_par("Parámetros", style = "heading 2") %>%
+          body_add_par(paste("Nombre del archivo:", input$file5$name), style = "Normal") %>%
+          body_add_par(paste("Variable Observada:", input$select_var1), style = "Normal") %>%
+          body_add_par(paste("Variable Auditada:", input$select_var2), style = "Normal")
+        
+        # Añadir título y subtítulos
+        doc <- doc %>%
+          body_add_par("Evaluación", style = "heading 1") %>%
+          body_add_par("1. Análisis de Diferencias", style = "heading 2")
+        
+        # Generar el gráfico y guardarlo en un archivo temporal
+        datos_para_grafico <- DatosEval() # Asegúrate de que esta función devuelve tus datos de forma correcta
+        p <- EvalScatterPlot(datos_para_grafico)
+        ruta_imagen <- tempfile(fileext = ".png")
+        ggsave(ruta_imagen, plot = p, width = 7, height = 5, dpi = 300)
+        
+        
+        # Aquí se agregan las partes del documento...
+        
+        # Añadir la tabla de diferencias si es que hay alguna
+        if (!is.null(Diferencias()) && nrow(Diferencias()) > 0) {
+          doc <- doc %>%
+            body_add_par("1. Análisis de Diferencias", style = "heading 2") %>%
+            body_add_table(Diferencias(), style = "table_template")
+        }
+        
+        # Generar y añadir el primer gráfico de dispersión
+        datos_para_grafico <- DatosEval()  # Asegúrate de que esta función devuelve tus datos de forma correcta
+        p <- EvalScatterPlot(datos_para_grafico)
+        ruta_imagen <- tempfile(fileext = ".png")
+        ggsave(ruta_imagen, plot = p, width = 7, height = 5, dpi = 300)
+        
+        # Añadir el gráfico de dispersión
+        doc <- doc %>%
+          body_add_par("Gráfico de dispersión entre los valores Observados vs Auditados.", style = "heading 2") %>%
+          body_add_img(src = ruta_imagen, width = 7, height = 5)
+        
+        # Añadir sección de Indicadores de Riesgo
+        doc <- doc %>%
+          body_add_par("3. Indicadores de Riesgo", style = "heading 2") %>%
+          body_add_table(IndicadoresRiesgo(DatosEval()), style = "table_template")
+        
+        # Generar y añadir el segundo gráfico de dispersión con límites de confianza
+        q <- ScatterPlotLim(DatosEval())
+        ruta_imagen2 <- tempfile(fileext = ".png")
+        ggsave(ruta_imagen2, plot = q, width = 7, height = 5, dpi = 300)
+        
+        # Añadir el gráfico de dispersión con límites de confianza
+        doc <- doc %>%
+          body_add_par("Scatter Plot con Límites de Confianza", style = "heading 2") %>%
+          body_add_img(src = ruta_imagen2, width = 7, height = 5)
+        
+        # Añade la tabla de decisión almacenada en la variable reactiva
+        doc <- doc %>%
+          body_add_par("3. Criterio empírico de la evaluación de la auditoría", style = "heading 2") %>%
+          body_add_table(tablaDecisionReactiva(), style = "table_template")
+        
+        # Guardar el documento
+        print(doc, target = file)
+        
+        # Limpiar eliminando las imágenes temporales
+        unlink(ruta_imagen)
+        unlink(ruta_imagen2)
+      }
     )
-  }
-  
-  # Observa cuando el botón "auditEval" es presionado
-  observeEvent(input$auditEval, {
-    # No es necesario definir las funciones aquí
-    # Solo realiza la acción necesaria cuando se presiona el botón
-  }, ignoreInit = TRUE)
-  
-  # Renderiza la tabla reactiva solo después de que se presiona el botón de evaluación
-  output$Eval <- renderReactable({
-    req(input$auditEval > 0)  # Usa una condición directamente aquí
-    req(DatosEval())  # Asegúrate de que DatosEval esté disponible
-    tabla_decision <- calculaIndicadoresDecision(DatosEval()) %>%
-      dplyr::select("Indicador", "Valor", "Criterio", "Decision")
-    reactable(tabla_decision)
+    
+    
+ 
+    
+    
+    ##################################################
+    #   Hasta acá el Observt Event
+    ##################################################
+    
+    
   })
   
-  
-  ##################################
-  #    Reporte de la evaluación    #
-  ##################################
-  
-  # Structura #
-  
+ 
   
 
   
